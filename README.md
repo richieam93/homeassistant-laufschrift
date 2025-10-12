@@ -57,11 +57,11 @@ Nach der Konfiguration werden folgende Entitäten erstellt (beachte, dass `NAME`
 Du kannst diese Entitäten in deinen Automatisierungen und Skripten verwenden.
 
 ## 🎨 Beispiel Steuerung
-    *   ![Einstellungen](images/Einstellungen.PNG)
-    *   ![Entitäten](images/Entitäten.PNG)
-    *   ![Laufschrift](images/laufschrift.PNG)
+    *   (images/Einstellungen.PNG)
+    *   (images/Entitäten.PNG)
+    *   (images/laufschrift.PNG)
 ## Lokaler Webserver
-    *   ![Webserver](images/Webserver.PNG)
+    *   (images/Webserver.PNG)
 
 ### Text Automation:
 
