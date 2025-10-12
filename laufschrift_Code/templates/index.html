@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Laufschrift-Konfiguration</title>
+</head>
+<body>
+    <h1>Laufschrift-Konfiguration</h1>
+    <form method="post">
+        <label for="text">Text:</label><br>
+        <input type="text" id="text" name="text" value="{{ text }}"><br><br>
+        <label for="brightness">Helligkeit:</label><br>
+        <input type="number" id="brightness" name="brightness" min="0" max="255" value="{{ brightness }}"><br><br>
+        <label for="speed">Geschwindigkeit:</label><br>
+        <input type="number" id="speed" name="speed" value="{{ speed }}"><br><br>
+        <label for="red">Rot:</label><br>
+        <input type="number" id="red" name="red" min="0" max="255" value="{{ red }}"><br><br>
+        <label for="green">Grün:</label><br>
+        <input type="number" id="green" name="green" min="0" max="255" value="{{ green }}"><br><br>
+        <label for="blue">Blau:</label><br>
+        <input type="number" id="blue" name="blue" min="0" max="255" value="{{ blue }}"><br><br>
+        <input type="submit" value="Senden">
+    </form>
+    <br>
+    <button onclick="location.href='/shutdown'">PC Herunterfahren</button>
+</body>
+</html>

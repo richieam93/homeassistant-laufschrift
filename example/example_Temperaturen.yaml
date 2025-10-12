@@ -1,0 +1,19 @@
+alias: Temperaturen+ Tankstelle auf Laufschrift
+description: Zeigt stündlich die Temperaturen verschiedener Sensoren auf der Laufschrift an
+triggers:
+  - trigger: time_pattern
+    minutes: /50
+actions:
+  - action: laufschrift.laufschrift_set_text
+    data:
+      text: >-
+        Temperaturen: Wohnzimmer: {{ states('sensor.airpurifier_temperature')
+        }}°C, Schlafzimmer: {{
+        states('sensor.stecker_mucken_device_temperature') }}°C, TV Sideboard:
+        {{ states('sensor.stecker_tv_leds_device_temperature') }}°C, Caffè
+        Maschine: {{ states('sensor.stecker_kaffe_device_temperature') }}°C,
+        Balkon: {{ states('sensor.kresse_temperature') }}°C, Tankstelle R.
+        Waser: Diesel: {{ state_attr('sensor.r_waser', 'DIESEL') }} CHF, SP95:
+        {{ state_attr('sensor.r_waser', 'SP95') }} CHF, SP98: {{
+        state_attr('sensor.r_waser', 'SP98') }} CHF
+mode: single

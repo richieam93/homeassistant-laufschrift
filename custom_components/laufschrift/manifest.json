@@ -1,0 +1,12 @@
+{
+  "domain": "laufschrift",
+  "name": "Laufschrift",
+  "version": "1.0.0",
+  "documentation": "https://github.com/richieam93/homeassistant-laufschrift",
+  "issue_tracker": "https://github.com/richieam93/homeassistant-laufschrift/issues",
+  "dependencies": [],
+  "codeowners": ["@richieam93"],
+  "requirements": ["aiohttp"],
+  "config_flow": true,
+  "iot_class": "Local Polling"
+}

@@ -1,0 +1,23 @@
+laufschrift_set_text:
+  description: Set the text to display on the Laufschrift.
+  fields:
+    text:
+      description: The text to display.
+      example: Hello, World!
+
+laufschrift_set_brightness:
+  description: Set the brightness of the Laufschrift.
+  fields:
+    brightness:
+      description: The brightness value (0-255).
+      example: 150
+
+laufschrift_set_speed:
+  description: Set the speed of the Laufschrift.
+  fields:
+    speed:
+      description: The speed value.
+      example: 5
+
+laufschrift_shutdown:
+  description: Shutdown the Laufschrift.
