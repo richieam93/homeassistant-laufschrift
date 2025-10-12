@@ -1,10 +1,10 @@
-"""Platform for number entity."""
+"""Platform for brightness select entity."""
 import logging
 
 import aiohttp
 import voluptuous as vol
 
-from homeassistant.components.number import NumberEntity, NumberMode
+from homeassistant.components.select import SelectEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -19,41 +19,39 @@ async def async_setup_entry(
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up the number platform."""
-    _LOGGER.info("Setting up number platform")
+    """Set up the select platform."""
+    _LOGGER.info("Setting up brightness platform")
     host = config_entry.data.get("host")
 
-    async_add_entities([LaufschriftBrightnessNumber(host)])
+    async_add_entities([LaufschriftBrightnessSelect(host, config_entry)])
 
 
-class LaufschriftBrightnessNumber(NumberEntity):
-    """Representation of a Laufschrift brightness number."""
+class LaufschriftBrightnessSelect(SelectEntity):
+    """Representation of a Laufschrift brightness select."""
 
     _attr_name = "Helligkeit"
-    _attr_unique_id = "laufschrift_brightness_number"
-    _attr_native_min_value = 0
-    _attr_native_max_value = 255
-    _attr_native_step = 1
-    _attr_mode = NumberMode.SLIDER
+    _attr_unique_id = "laufschrift_brightness_select"
+    _attr_options = ["30", "80", "130", "180", "230", "255"]
 
-    def __init__(self, host: str) -> None:
+    def __init__(self, host: str, config_entry: ConfigEntry) -> None:
         """Initialize the entity."""
         self._host = host
-        self._brightness = 230  # Standardhelligkeit
+        self.config_entry = config_entry
+        self._selected_brightness = config_entry.options.get("brightness", "230")  # Standardhelligkeit
 
     @property
-    def native_value(self) -> float | None:
-        """Return the brightness value."""
-        return self._brightness
+    def current_option(self) -> str | None:
+        """Return the selected option."""
+        return self._selected_brightness
 
-    async def async_set_native_value(self, value: float) -> None:
-        """Set the brightness value."""
-        _LOGGER.debug(f"Setting brightness to: {value}")
-        self._brightness = value
-        await self.set_laufschrift_brightness(int(value))
+    async def async_select_option(self, option: str) -> None:
+        """Change the selected option."""
+        _LOGGER.debug(f"Setting brightness to: {option}")
+        self._selected_brightness = option
+        await self.set_laufschrift_brightness(option)
         self.async_write_ha_state()
 
-    async def set_laufschrift_brightness(self, brightness: int) -> None:
+    async def set_laufschrift_brightness(self, brightness: str) -> None:
         """Send the brightness to the Laufschrift."""
         try:
             async with aiohttp.ClientSession() as session:
