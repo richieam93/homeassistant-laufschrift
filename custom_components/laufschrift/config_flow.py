@@ -73,12 +73,15 @@ class LaufschriftOptionsFlow(config_entries.OptionsFlow):
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
 
+        brightness_options = ["30", "80", "130", "180", "230", "255"]
+        speed_options = ["1", "2", "3", "4", "5"]
+
         return self.async_show_form(
             step_id="init",
             data_schema=vol.Schema(
                 {
-                    vol.Optional("brightness", default=self.config_entry.options.get("brightness", 230)): int,
-                    vol.Optional("speed", default=self.config_entry.options.get("speed", 3)): int,
+                    vol.Optional("brightness", default=self.config_entry.options.get("brightness", "230")): vol.In(brightness_options),
+                    vol.Optional("speed", default=self.config_entry.options.get("speed", "3")): vol.In(speed_options),
                 }
             ),
         )
