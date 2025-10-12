@@ -4,7 +4,7 @@
 
 Diese Integration ermöglicht die Steuerung einer Laufschrift über Home Assistant. Sie ermöglicht das Einstellen von Text, Helligkeit, Geschwindigkeit und Farbe über eine benutzerdefinierte Komponente.
 
-## Funktionen ✨
+## ✨ Funktionen
 
 *   **Text einstellen:** Ändere den angezeigten Text der Laufschrift.
 *   **Helligkeit einstellen:** Passe die Helligkeit der Laufschrift an.
@@ -12,12 +12,12 @@ Diese Integration ermöglicht die Steuerung einer Laufschrift über Home Assista
 *   **Farbe einstellen:** Wähle die Farbe des Textes auf der Laufschrift.
 *   **PC herunterfahren:** Schalter zum Herunterfahren des PCs, auf dem die Laufschrift-Software läuft.
 
-## Voraussetzungen ✅
+## ✅ Voraussetzungen
 
 *   Home Assistant 2023.1 oder höher
 *   HACS (Home Assistant Community Store)
 
-## Installation 🚀
+## 🚀 Installation
 
 1.  Füge dieses Repository als Custom Repository in HACS hinzu.
     *   Repository: `richieam93/homeassistant-laufschrift`
@@ -25,7 +25,7 @@ Diese Integration ermöglicht die Steuerung einer Laufschrift über Home Assista
 2.  Installiere die "Laufschrift" Integration über HACS.
 3.  Starte Home Assistant neu.
 
-## Konfiguration ⚙️
+## ⚙️ Konfiguration
 
 1.  **Software auf dem PC starten:**
     *   Vor der Installation der Integration muss die Laufschrift-Software auf dem PC gestartet werden. Diese befindet sich im Ordner `homeassistant-laufschrift\Laufschrift_exe`.
@@ -37,7 +37,7 @@ Diese Integration ermöglicht die Steuerung einer Laufschrift über Home Assista
 3.  **Optionen konfigurieren:**
     *   Nach der Installation kannst du die Standardwerte für Helligkeit und Geschwindigkeit über die "Optionen" der Integration anpassen.
 
-## Verwendung 💡
+## 💡 Verwendung
 
 Nach der Konfiguration werden folgende Entitäten erstellt:
 
@@ -49,7 +49,7 @@ Nach der Konfiguration werden folgende Entitäten erstellt:
 
 Du kannst diese Entitäten in Deinen Automatisierungen und Skripten verwenden.
 
-## Beispiel Automation 📖
+## 📖 Beispiel Automation
 
 ```yaml
 automation:
@@ -73,16 +73,11 @@ automation:
             SP98: {{ state_attr('sensor.r_waser', 'SP98') }} CHF
     mode: single
 
-
-## Beispiel Steuerung 📖
-
-
-Anpassung von Helligkeit, Geschwindigkeit und Farbe 🎨
+## 🎨 Beispiel Steuerung
+Anpassung von Helligkeit, Geschwindigkeit und Farbe
 Um die Helligkeit, Geschwindigkeit und Farbe über Automatisierungen oder Skripte zu ändern, verwende den select.select_option Service. Hier sind Beispiele:
 
 ## Helligkeit ändern:
-
-```yaml
 action:
   - service: select.select_option
     data:
@@ -90,8 +85,6 @@ action:
       option: "255"  # Wähle eine Helligkeitsstufe aus den verfügbaren Optionen
 
 ## Geschwindigkeit ändern:
-
-```yaml
 action:
   - service: select.select_option
     data:
@@ -99,8 +92,6 @@ action:
       option: "5"  # Wähle eine Geschwindigkeitsstufe aus den verfügbaren Optionen
 
 ## Farbe ändern:
-
-```yaml
 action:
   - service: select.select_option
     data:
