@@ -12,7 +12,7 @@ from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers import config_validation as cv
 
-from .const import DOMAIN, PLATFORMS, SERVICE_LAUFSCHRIFT_SET_TEXT, SERVICE_LAUFSCHRIFT_SET_BRIGHTNESS, SERVICE_LAUFSCHRIFT_SET_SPEED, SERVICE_LAUFSCHRIFT_SHUTDOWN
+from .const import DOMAIN, PLATFORMS, SERVICE_LAUFSCHRIFT_SET_TEXT, SERVICE_LAUFSCHRIFT_SHUTDOWN
 
 _LOGGER: logging.Logger = logging.getLogger(__package__)
 
@@ -52,18 +52,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         _LOGGER.debug(f"Setting text to {text}")
         await async_set_value(hass, entry, "text", text)
 
-    async def async_set_brightness_service(call: ServiceCall):
-        """Service call to set the brightness."""
-        brightness = call.data.get("brightness", 230)
-        _LOGGER.debug(f"Setting brightness to {brightness}")
-        await async_set_value(hass, entry, "brightness", brightness)
-
-    async def async_set_speed_service(call: ServiceCall):
-        """Service call to set the speed."""
-        speed = call.data.get("speed", 3)
-        _LOGGER.debug(f"Setting speed to {speed}")
-        await async_set_value(hass, entry, "speed", speed)
-
     async def async_shutdown_service(call: ServiceCall):
         """Service call to shutdown the Laufschrift."""
         _LOGGER.info("Shutting down the Laufschrift")
@@ -76,10 +64,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         try:
             if parameter == "text":
                 url = f"http://{host}:5000/text/{value}"
-            elif parameter == "brightness":
-                url = f"http://{host}:5000/brightness/{value}"
-            elif parameter == "speed":
-                url = f"http://{host}:5000/speed/{value}"
             elif parameter == "shutdown":
                 url = f"http://{host}:5000/shutdown"
             else:
@@ -94,8 +78,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
 
     # Registriere die Services
     hass.services.async_register(DOMAIN, SERVICE_LAUFSCHRIFT_SET_TEXT, async_set_text_service)
-    hass.services.async_register(DOMAIN, SERVICE_LAUFSCHRIFT_SET_BRIGHTNESS, async_set_brightness_service)
-    hass.services.async_register(DOMAIN, SERVICE_LAUFSCHRIFT_SET_SPEED, async_set_speed_service)
     hass.services.async_register(DOMAIN, SERVICE_LAUFSCHRIFT_SHUTDOWN, async_shutdown_service)
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
