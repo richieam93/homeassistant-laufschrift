@@ -12,6 +12,14 @@ Diese Integration ermöglicht die Steuerung einer Laufschrift über Home Assista
 *   **Farbe einstellen:** Wähle die Farbe des Textes auf der Laufschrift.
 *   **PC herunterfahren:** Schalter zum Herunterfahren des PCs, auf dem die Laufschrift-Software läuft.
 
+## Software-Verhalten 🖥️
+
+Die Laufschrift-Software auf deinem PC zeigt den Text in einem Fenster an. Folgendes Verhalten ist zu beachten:
+
+*   **Initialisierung:** Nach dem Start minimiert sich das Fenster automatisch in den Hintergrund.
+*   **Textanzeige:** Wenn ein neuer Text über Home Assistant gesendet wird, erscheint das Fenster kurzzeitig (Pop-up), zeigt den Text einmalig an und minimiert sich danach wieder automatisch in den Hintergrund.
+*   **Einmalige Anzeige:** Der Text wird nur einmal angezeigt, nicht in einer Endlosschleife.
+
 ## ✅ Voraussetzungen
 
 *   Home Assistant 2023.1 oder höher
