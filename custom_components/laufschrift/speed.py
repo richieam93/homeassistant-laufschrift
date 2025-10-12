@@ -1,10 +1,10 @@
-"""Platform for number entity."""
+"""Platform for speed select entity."""
 import logging
 
 import aiohttp
 import voluptuous as vol
 
-from homeassistant.components.number import NumberEntity, NumberMode
+from homeassistant.components.select import SelectEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -19,41 +19,39 @@ async def async_setup_entry(
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up the number platform."""
-    _LOGGER.info("Setting up number platform")
+    """Set up the select platform."""
+    _LOGGER.info("Setting up speed platform")
     host = config_entry.data.get("host")
 
-    async_add_entities([LaufschriftSpeedNumber(host)])
+    async_add_entities([LaufschriftSpeedSelect(host, config_entry)])
 
 
-class LaufschriftSpeedNumber(NumberEntity):
-    """Representation of a Laufschrift speed number."""
+class LaufschriftSpeedSelect(SelectEntity):
+    """Representation of a Laufschrift speed select."""
 
     _attr_name = "Geschwindigkeit"
-    _attr_unique_id = "laufschrift_speed_number"
-    _attr_native_min_value = 1
-    _attr_native_max_value = 10
-    _attr_native_step = 1
-    _attr_mode = NumberMode.SLIDER
+    _attr_unique_id = "laufschrift_speed_select"
+    _attr_options = ["1", "2", "3", "4", "5"]
 
-    def __init__(self, host: str) -> None:
+    def __init__(self, host: str, config_entry: ConfigEntry) -> None:
         """Initialize the entity."""
         self._host = host
-        self._speed = 3  # Standardgeschwindigkeit
+        self.config_entry = config_entry
+        self._selected_speed = config_entry.options.get("speed", "3")  # Standardgeschwindigkeit
 
     @property
-    def native_value(self) -> float | None:
-        """Return the speed value."""
-        return self._speed
+    def current_option(self) -> str | None:
+        """Return the selected option."""
+        return self._selected_speed
 
-    async def async_set_native_value(self, value: float) -> None:
-        """Set the speed value."""
-        _LOGGER.debug(f"Setting speed to: {value}")
-        self._speed = value
-        await self.set_laufschrift_speed(int(value))
+    async def async_select_option(self, option: str) -> None:
+        """Change the selected option."""
+        _LOGGER.debug(f"Setting speed to: {option}")
+        self._selected_speed = option
+        await self.set_laufschrift_speed(option)
         self.async_write_ha_state()
 
-    async def set_laufschrift_speed(self, speed: int) -> None:
+    async def set_laufschrift_speed(self, speed: str) -> None:
         """Send the speed to the Laufschrift."""
         try:
             async with aiohttp.ClientSession() as session:
