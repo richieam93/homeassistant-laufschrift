@@ -38,10 +38,8 @@ Die Laufschrift-Software auf deinem PC zeigt den Text in einem Fenster an. Folge
 1.  **Laufschrift-Software starten:**
     *   Stelle sicher, dass die Laufschrift-Software auf dem PC gestartet ist, bevor du die Integration installierst. Du findest sie im Ordner `homeassistant-laufschrift\Laufschrift_exe`.
     *   Du kannst die Software manuell starten oder ein Skript verwenden.
-    *   ![Webserver](images/Webserver.PNG)
 2.  **Integration hinzufügen:**
     *   Gehe zu "Konfiguration" -> "Integrationen" in Home Assistant.
-        *   ![Einstellungen](images/Einstellungen.PNG)
     *   Klicke auf den "+ Integration hinzufügen" Button und suche nach "Laufschrift".
     *   Gib die IP-Adresse und den Namen deines PCs ein, auf dem die Laufschrift-App ausgeführt wird.
 3.  **Optionen konfigurieren:**
@@ -50,8 +48,6 @@ Die Laufschrift-Software auf deinem PC zeigt den Text in einem Fenster an. Folge
 ## 💡 Verwendung
 
 Nach der Konfiguration werden folgende Entitäten erstellt (beachte, dass `NAME` durch den von dir vergebenen Namen ersetzt wird):
-    *   ![Entitäten](images/Entitäten.PNG)
-    *   ![Laufschrift](images/Laufschrift.PNG)
 *   `text.laufschrift_NAME_text`: Ermöglicht das Einstellen des Textes, der auf der Laufschrift angezeigt wird.
 *   `select.laufschrift_NAME_brightness`: Ermöglicht die Auswahl der Helligkeit.
 *   `select.laufschrift_NAME_speed`: Ermöglicht die Auswahl der Geschwindigkeit.
@@ -61,6 +57,11 @@ Nach der Konfiguration werden folgende Entitäten erstellt (beachte, dass `NAME`
 Du kannst diese Entitäten in deinen Automatisierungen und Skripten verwenden.
 
 ## 🎨 Beispiel Steuerung
+    *   ![Einstellungen](images/Einstellungen.PNG)
+    *   ![Entitäten](images/Entitäten.PNG)
+    *   ![Laufschrift](images/laufschrift.PNG)
+## Lokaler Webserver
+    *   ![Webserver](images/Webserver.PNG)
 
 ### Text Automation:
 
