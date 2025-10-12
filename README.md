@@ -72,3 +72,37 @@ automation:
             SP95: {{ state_attr('sensor.r_waser', 'SP95') }} CHF,
             SP98: {{ state_attr('sensor.r_waser', 'SP98') }} CHF
     mode: single
+
+
+## Beispiel Steuerung 📖
+
+
+Anpassung von Helligkeit, Geschwindigkeit und Farbe 🎨
+Um die Helligkeit, Geschwindigkeit und Farbe über Automatisierungen oder Skripte zu ändern, verwende den select.select_option Service. Hier sind Beispiele:
+
+## Helligkeit ändern:
+
+```yaml
+action:
+  - service: select.select_option
+    data:
+      entity_id: select.laufschrift_brightness
+      option: "255"  # Wähle eine Helligkeitsstufe aus den verfügbaren Optionen
+
+## Geschwindigkeit ändern:
+
+```yaml
+action:
+  - service: select.select_option
+    data:
+      entity_id: select.laufschrift_speed
+      option: "5"  # Wähle eine Geschwindigkeitsstufe aus den verfügbaren Optionen
+
+## Farbe ändern:
+
+```yaml
+action:
+  - service: select.select_option
+    data:
+      entity_id: select.laufschrift_color
+      option: "Rot"  # Wähle eine Farbe aus den verfügbaren Optionen
