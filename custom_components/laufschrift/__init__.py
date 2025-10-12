@@ -37,11 +37,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         hass.data.setdefault(DOMAIN, {})
 
     host = entry.data.get("host")
+    name = entry.data.get("name")  # Hole den Namen aus der ConfigEntry
 
     session = aiohttp.ClientSession()
 
     hass.data[DOMAIN][entry.entry_id] = {
         "host": host,
+        "name": name,  # Speichere den Namen in den Daten
         "session": session,
     }
 

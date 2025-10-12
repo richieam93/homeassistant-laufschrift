@@ -20,20 +20,22 @@ async def async_setup_entry(
     """Set up the switch platform."""
     _LOGGER.info("Setting up switch platform")
     host = config_entry.data.get("host")
+    name = config_entry.data.get("name")  # Hole den Namen aus der ConfigEntry
 
-    async_add_entities([LaufschriftShutdownSwitch(host)])
+    async_add_entities([LaufschriftShutdownSwitch(host, name, config_entry)])
 
 
 class LaufschriftShutdownSwitch(SwitchEntity):
     """Representation of a Laufschrift shutdown switch."""
 
-    _attr_name = "PC herunterfahren"  # Geänderter Name
-    _attr_unique_id = "laufschrift_shutdown_switch"
-
-    def __init__(self, host: str) -> None:
+    def __init__(self, host: str, name: str, config_entry: ConfigEntry) -> None:
         """Initialize the entity."""
         self._host = host
+        self._name = name
+        self.config_entry = config_entry
         self._is_on = False
+        self._attr_unique_id = f"laufschrift_{host}_{name}_shutdown_switch"  # Eindeutige ID
+        self._attr_name = f"{name} PC Herunterfahren"  # Anzeigename
 
     @property
     def is_on(self) -> bool:

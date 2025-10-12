@@ -22,21 +22,24 @@ async def async_setup_entry(
     """Set up the select platform."""
     _LOGGER.info("Setting up select platform")
     host = config_entry.data.get("host")
+    name = config_entry.data.get("name")  # Hole den Namen aus der ConfigEntry
 
-    async_add_entities([LaufschriftColorSelect(host)])
+    async_add_entities([LaufschriftColorSelect(host, name, config_entry)])
 
 
 class LaufschriftColorSelect(SelectEntity):
     """Representation of a Laufschrift color select."""
 
-    _attr_name = "Farbe"
-    _attr_unique_id = "laufschrift_color_select"
     _attr_options = ["Rot", "Grün", "Blau", "Weiss"]
 
-    def __init__(self, host: str) -> None:
+    def __init__(self, host: str, name: str, config_entry: ConfigEntry) -> None:
         """Initialize the entity."""
         self._host = host
+        self._name = name
+        self.config_entry = config_entry
         self._selected_color = "Weiss"  # Standardfarbe
+        self._attr_unique_id = f"laufschrift_{host}_{name}_color_select"  # Eindeutige ID
+        self._attr_name = f"{name} Farbe"  # Anzeigename
 
     @property
     def current_option(self) -> str | None:

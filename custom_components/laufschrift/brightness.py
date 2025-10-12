@@ -22,36 +22,38 @@ async def async_setup_entry(
     """Set up the select platform."""
     _LOGGER.info("Setting up brightness platform")
     host = config_entry.data.get("host")
+    name = config_entry.data.get("name")
 
-    async_add_entities([LaufschriftBrightnessSelect(host, config_entry)])
+    async_add_entities([LaufschriftBrightnessSelect(host, name, config_entry)])
 
 
 class LaufschriftBrightnessSelect(SelectEntity):
     """Representation of a Laufschrift brightness select."""
 
     _attr_name = "Helligkeit"
-    _attr_unique_id = "laufschrift_brightness_select"
     _attr_options = ["30", "80", "130", "180", "230", "255"]
 
-    def __init__(self, host: str, config_entry: ConfigEntry) -> None:
+    def __init__(self, host: str, name: str, config_entry: ConfigEntry) -> None:
         """Initialize the entity."""
         self._host = host
+        self._name = name
         self.config_entry = config_entry
-        self._selected_brightness = config_entry.options.get("brightness", "230")  # Standardhelligkeit
+        self._selected_brightness = int(config_entry.options.get("brightness", "230"))  # Als Integer speichern
+        self._attr_unique_id = f"laufschrift_{host}_{name}_brightness_select"
 
     @property
     def current_option(self) -> str | None:
         """Return the selected option."""
-        return self._selected_brightness
+        return str(self._selected_brightness)  # Als String zurückgeben
 
     async def async_select_option(self, option: str) -> None:
         """Change the selected option."""
         _LOGGER.debug(f"Setting brightness to: {option}")
-        self._selected_brightness = option
-        await self.set_laufschrift_brightness(option)
+        self._selected_brightness = int(option)  # Als Integer speichern
+        await self.set_laufschrift_brightness(self._selected_brightness)  # Integer übergeben
         self.async_write_ha_state()
 
-    async def set_laufschrift_brightness(self, brightness: str) -> None:
+    async def set_laufschrift_brightness(self, brightness: int) -> None:
         """Send the brightness to the Laufschrift."""
         try:
             async with aiohttp.ClientSession() as session:

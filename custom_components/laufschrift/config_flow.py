@@ -5,7 +5,7 @@ import aiohttp
 import voluptuous as vol
 
 from homeassistant import config_entries
-from homeassistant.const import CONF_HOST
+from homeassistant.const import CONF_HOST, CONF_NAME
 from homeassistant.core import callback
 
 from .const import DOMAIN
@@ -30,17 +30,21 @@ class LaufschriftConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 _LOGGER.exception("Unexpected exception")
                 errors["base"] = "unknown"
             else:
-                return self.async_create_entry(title=user_input[CONF_HOST], data=user_input)
+                return self.async_create_entry(
+                    title=user_input[CONF_NAME],  # Verwende den Namen als Titel
+                    data=user_input
+                )
 
         return self.async_show_form(
             step_id="user",
             data_schema=vol.Schema(
                 {
                     vol.Required(CONF_HOST): str,
+                    vol.Required(CONF_NAME, default="Laufschrift"): str,  # Füge das Namensfeld hinzu
                 }
             ),
             errors=errors,
-            )
+        )
 
     async def _test_connect(self, host):
         """Test connection to the Laufschrift."""
