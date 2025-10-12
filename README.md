@@ -1,6 +1,6 @@
 # Home Assistant Laufschrift Integration
 
-Diese Integration ermöglicht die Steuerung einer Laufschrift über Home Assistant.
+Diese Integration ermöglicht die Steuerung einer Laufschrift über Home Assistant. Sie ermöglicht das Einstellen von Text, Helligkeit, Geschwindigkeit und Farbe über eine benutzerdefinierte Komponente.
 
 ## Funktionen
 
@@ -25,10 +25,14 @@ Diese Integration ermöglicht die Steuerung einer Laufschrift über Home Assista
 
 ## Konfiguration
 
-1.  Gehe zu "Konfiguration" -> "Integrationen" in Home Assistant.
-2.  Klicke auf den "+ Integration hinzufügen" Button und suche nach "Laufschrift".
-3.  Gib die IP-Adresse Deiner Laufschrift-App ein.
-4.  Konfiguriere die gewünschten Optionen (Helligkeit, Geschwindigkeit, Farbe).
+1.  **Software auf dem PC starten**:
+    *   Vor der Installation der Integration muss die Laufschrift-Software auf dem PC gestartet werden. Diese befindet sich im Ordner `homeassistant-laufschrift\Laufschrift_exe`.
+    *   Die Software kann entweder manuell oder über ein Skript gestartet werden.
+2.  **Integration hinzufügen**:
+    *   Gehe zu "Konfiguration" -> "Integrationen" in Home Assistant.
+    *   Klicke auf den "+ Integration hinzufügen" Button und suche nach "Laufschrift".
+    *   Gib die IP-Adresse Deines PCs ein, auf dem die Laufschrift-App ausgeführt wird.
+    *   Konfiguriere die gewünschten Optionen (Helligkeit, Geschwindigkeit, Farbe).
 
 ## Verwendung
 
@@ -45,11 +49,22 @@ Du kannst diese Entitäten in Deinen Automatisierungen und Skripten verwenden.
 ## Beispiel Automation
 
 ```yaml
-alias: Laufschrift aktualisieren
+alias: Temperaturen + Tankstelle auf Laufschrift
+description: Zeigt stündlich die Temperaturen verschiedener Sensoren auf der Laufschrift an
 trigger:
-  - platform: state
-    entity_id: input_text.laufschrift_text
+  - platform: time_pattern
+    minutes: /50
 action:
   - service: laufschrift.laufschrift_set_text
     data:
-      text: "{{ trigger.to_state.state }}"
+      text: >-
+        Temperaturen: Wohnzimmer: {{ states('sensor.airpurifier_temperature')
+        }}°C, Schlafzimmer: {{
+        states('sensor.stecker_mucken_device_temperature') }}°C, TV Sideboard:
+        {{ states('sensor.stecker_tv_leds_device_temperature') }}°C, Caffè
+        Maschine: {{ states('sensor.stecker_kaffe_device_temperature') }}°C,
+        Balkon: {{ states('sensor.kresse_temperature') }}°C, Tankstelle R.
+        Waser: Diesel: {{ state_attr('sensor.r_waser', 'DIESEL') }} CHF, SP95:
+        {{ state_attr('sensor.r_waser', 'SP95') }} CHF, SP98: {{
+        state_attr('sensor.r_waser', 'SP98') }} CHF
+mode: single
