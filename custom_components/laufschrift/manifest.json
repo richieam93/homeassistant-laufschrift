@@ -1,7 +1,7 @@
 {
   "domain": "laufschrift",
   "name": "Laufschrift",
-  "version": "1.0.0",
+  "version": "1.0.0",  // Korrektes Format
   "documentation": "https://github.com/richieam93/homeassistant-laufschrift",
   "issue_tracker": "https://github.com/richieam93/homeassistant-laufschrift/issues",
   "dependencies": [],
