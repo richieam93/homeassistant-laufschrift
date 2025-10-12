@@ -16,7 +16,7 @@ _LOGGER = logging.getLogger(__name__)
 class LaufschriftConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow for Laufschrift."""
 
-    VERSION = 1.0.1
+    VERSION = 1
     CONNECTION_CLASS = config_entries.CONN_CLASS_LOCAL_POLL
 
     async def async_step_user(self, user_input=None):
