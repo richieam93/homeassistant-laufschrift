@@ -251,14 +251,6 @@ MIT License
 Made with ❤️ in Switzerland 🇨🇭 | Entwickelt mit ❤️ in der Schweiz 🇨🇭
 
 
-
-
-# Home Assistant Laufschrift Integration 📝
-
-[![HACS Default](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/hacs/integration)
-
-Diese Integration ermöglicht die Steuerung einer Laufschrift über Home Assistant. Sie bietet Funktionen zum Einstellen von Text, Helligkeit, Geschwindigkeit und Farbe über eine benutzerdefinierte Komponente.
-
 ## ✨ Funktionen
 
 *   **Text einstellen:** Ändere den angezeigten Text der Laufschrift.
@@ -311,12 +303,6 @@ Nach der Konfiguration werden folgende Entitäten erstellt (beachte, dass `NAME`
 
 Du kannst diese Entitäten in deinen Automatisierungen und Skripten verwenden.
 
-## 🎨 Beispiel Steuerung
-    *   (images/Einstellungen.PNG)
-    *   (images/Entitäten.PNG)
-    *   (images/laufschrift.PNG)
-## Lokaler Webserver
-    *   (images/Webserver.PNG)
 
 ### Text Automation:
 
