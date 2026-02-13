@@ -80,7 +80,7 @@ Send text from Home Assistant to your PC/TV/Android. The text appears briefly as
 | Platform | Requirements |
 |----------|--------------|
 | **Windows** | Windows PC |
-| **Android** | Android 5.0+ / Android TV |
+| **Android** | Android 6.0+ / Android TV |
 | **Home Assistant** | 2023.1 or higher + HACS |
 
 ---
