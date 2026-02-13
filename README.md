@@ -1,8 +1,8 @@
 # Home Assistant Laufschrift Integration 📝
 
-🖥️ **Display scrolling text notifications on your TV/PC**
+🖥️ **Display scrolling text notifications on your TV/PC/Android**
 
-🖥️ **Laufschrift-Benachrichtigungen auf deinem TV/PC anzeigen**
+🖥️ **Laufschrift-Benachrichtigungen auf deinem TV/PC/Android anzeigen**
 
 [English](#-english) | [Deutsch](#-deutsch)
 
@@ -15,13 +15,14 @@
 | 🇩🇪 German UI | ✅ Ready |
 | 🇬🇧 English UI | 🚧 Coming soon |
 | 🖥️ Windows | ✅ Ready |
+| 📱 Android / Android TV | ✅ Ready (NEW!) |
 | 🐧 Linux/Mac | 🚧 Coming soon |
 
 ---
 
 # 🇬🇧 English
 
-This integration allows you to display scrolling text notifications on any Windows PC or TV connected to a PC.
+This integration allows you to display scrolling text notifications on any Windows PC, Android device, or TV.
 
 **Perfect for:** Media rooms, living rooms, offices – get notifications without interrupting what you're watching!
 
@@ -29,7 +30,7 @@ This integration allows you to display scrolling text notifications on any Windo
 
 ## 🎯 What does it do?
 
-Send text from Home Assistant to your PC/TV. The text appears briefly as a scrolling banner at the top of the screen, then disappears automatically.
+Send text from Home Assistant to your PC/TV/Android. The text appears briefly as a scrolling banner at the top of the screen, then disappears automatically.
 
 | Feature | Description |
 |---------|-------------|
@@ -43,7 +44,7 @@ Send text from Home Assistant to your PC/TV. The text appears briefly as a scrol
 
 ## ✨ How it works
 
-1. **PC Software** runs in background (minimized)
+1. **Software** runs in background (minimized)
 2. **Home Assistant** sends text via integration
 3. **Text appears** briefly at top of screen
 4. **Auto-hides** after text is displayed
@@ -62,30 +63,45 @@ Send text from Home Assistant to your PC/TV. The text appears briefly as a scrol
 ### Scrolling Text on Screen
 ![Laufschrift](images/laufschrift.PNG)
 
-### Web Configuration
+### Web Configuration (Windows)
 ![Webserver](images/Webserver.PNG)
+
+### Android App
+![Android App](images/android/app01.jpg)
+![Android App Settings](images/android/app02.jpg)
+
+### Web Configuration (Android)
+![Android Webserver](images/android/webserver-apk.JPG)
 
 ---
 
 ## 📋 Requirements
 
-| Requirement | Details |
-|-------------|---------|
-| **Home Assistant** | 2023.1 or higher |
-| **HACS** | Home Assistant Community Store |
-| **Windows PC** | For the display software |
+| Platform | Requirements |
+|----------|--------------|
+| **Windows** | Windows PC |
+| **Android** | Android 5.0+ / Android TV |
+| **Home Assistant** | 2023.1 or higher + HACS |
 
 ---
 
 ## 🚀 Installation
 
-### Step 1: Install PC Software
+### Option 1: Windows PC
 
-1. Download from: Laufschrift_exe/laufschrift_app.exe
+1. Download: Laufschrift_exe/laufschrift_app.exe
 2. Run on your Windows PC
 3. The app minimizes automatically to background
+4. Add shortcut to autostart for automatic startup
 
-### Step 2: Install Home Assistant Integration
+### Option 2: Android / Android TV (NEW!)
+
+1. Download: laufschrift_app/homelaufschrift.apk
+2. Install on your Android device or TV
+3. Grant overlay permission when asked
+4. App runs as background service
+
+### Home Assistant Integration
 
 1. Add this repository to HACS:
    - Repository: richieam93/homeassistant-laufschrift
@@ -93,12 +109,45 @@ Send text from Home Assistant to your PC/TV. The text appears briefly as a scrol
 2. Install "Laufschrift" via HACS
 3. Restart Home Assistant
 
-### Step 3: Configure
+### Configure
 
 1. Go to **Settings → Integrations**
 2. Click **"+ Add Integration"**
 3. Search for **"Laufschrift"**
-4. Enter PC IP address and name
+4. Enter device IP address and name
+
+---
+
+## 📱 Android App Features
+
+| Feature | Description |
+|---------|-------------|
+| 🌐 **Webserver** | Runs on port 5000, accessible from any device |
+| 📝 **Overlay** | Scrolls over all apps (even games, homescreen) |
+| 📍 **Position** | Top or bottom of screen |
+| ⚙️ **Settings** | Text size (20-120 SP), bar height (40-200 DP), speed (1-20), color (RGB + 8 quick colors) |
+| 🔄 **Auto-start** | Starts automatically after device reboot |
+| 📺 **TV optimized** | Works on Android TV boxes |
+| 🔒 **No root needed** | Uses Android Overlay Permission |
+| 💾 **Settings saved** | All settings are persisted |
+
+### Android REST API Examples
+
+- Text senden: http://[DEVICE-IP]:5000/text/Hello%20World
+- Position ändern: http://[DEVICE-IP]:5000/position/bottom
+- Farbe ändern: http://[DEVICE-IP]:5000/red/255
+- Geschwindigkeit: http://[DEVICE-IP]:5000/speed/10
+
+### 🎯 Typical Use Case
+
+**Scenario:** TV is running, someone rings the doorbell
+
+1. Home Assistant sends text to app
+2. Scrolling text appears over TV picture
+3. "🔔 Someone at the door!" scrolls by
+4. Disappears automatically
+
+**Perfect for:** Doorbell, washing machine done, warnings, reminders
 
 ---
 
@@ -124,7 +173,7 @@ See examples folder for automation YAML files.
 
 # 🇩🇪 Deutsch
 
-Diese Integration ermöglicht die Anzeige von Laufschrift-Benachrichtigungen auf jedem Windows PC oder TV, der mit einem PC verbunden ist.
+Diese Integration ermöglicht die Anzeige von Laufschrift-Benachrichtigungen auf jedem Windows PC, Android-Gerät oder TV.
 
 **Perfekt für:** Wohnzimmer, Büro, Medienraum – Benachrichtigungen ohne Unterbrechung!
 
@@ -132,7 +181,7 @@ Diese Integration ermöglicht die Anzeige von Laufschrift-Benachrichtigungen auf
 
 ## 🎯 Was macht es?
 
-Sende Text von Home Assistant an deinen PC/TV. Der Text erscheint kurz als Laufschrift am oberen Bildschirmrand und verschwindet dann automatisch.
+Sende Text von Home Assistant an deinen PC/TV/Android. Der Text erscheint kurz als Laufschrift am oberen Bildschirmrand und verschwindet dann automatisch.
 
 | Feature | Beschreibung |
 |---------|--------------|
@@ -146,7 +195,7 @@ Sende Text von Home Assistant an deinen PC/TV. Der Text erscheint kurz als Laufs
 
 ## ✨ So funktioniert es
 
-1. **PC Software** läuft im Hintergrund (minimiert)
+1. **Software** läuft im Hintergrund (minimiert)
 2. **Home Assistant** sendet Text über Integration
 3. **Text erscheint** kurz am oberen Bildschirmrand
 4. **Verschwindet automatisch** nach Anzeige
@@ -165,30 +214,45 @@ Sende Text von Home Assistant an deinen PC/TV. Der Text erscheint kurz als Laufs
 ### Laufschrift auf dem Bildschirm
 ![Laufschrift](images/laufschrift.PNG)
 
-### Web-Konfiguration
+### Web-Konfiguration (Windows)
 ![Webserver](images/Webserver.PNG)
+
+### Android App
+![Android App](images/android/app01.jpg)
+![Android App Einstellungen](images/android/app02.jpg)
+
+### Web-Konfiguration (Android)
+![Android Webserver](images/android/webserver-apk.JPG)
 
 ---
 
 ## 📋 Voraussetzungen
 
-| Anforderung | Details |
-|-------------|---------|
-| **Home Assistant** | 2023.1 oder höher |
-| **HACS** | Home Assistant Community Store |
-| **Windows PC** | Für die Anzeige-Software |
+| Plattform | Anforderungen |
+|-----------|---------------|
+| **Windows** | Windows PC |
+| **Android** | Android 5.0+ / Android TV |
+| **Home Assistant** | 2023.1 oder höher + HACS |
 
 ---
 
 ## 🚀 Installation
 
-### Schritt 1: PC Software installieren
+### Option 1: Windows PC
 
 1. Download: Laufschrift_exe/laufschrift_app.exe
 2. Auf Windows PC ausführen
 3. App minimiert sich automatisch
+4. Verknüpfung im Autostart für automatischen Start
 
-### Schritt 2: Home Assistant Integration installieren
+### Option 2: Android / Android TV (NEU!)
+
+1. Download: laufschrift_app/homelaufschrift.apk
+2. Auf Android-Gerät oder TV installieren
+3. Overlay-Berechtigung erteilen wenn gefragt
+4. App läuft als Hintergrund-Dienst
+
+### Home Assistant Integration
 
 1. Repository zu HACS hinzufügen:
    - Repository: richieam93/homeassistant-laufschrift
@@ -196,12 +260,45 @@ Sende Text von Home Assistant an deinen PC/TV. Der Text erscheint kurz als Laufs
 2. "Laufschrift" über HACS installieren
 3. Home Assistant neu starten
 
-### Schritt 3: Konfigurieren
+### Konfigurieren
 
 1. Gehe zu **Einstellungen → Integrationen**
 2. Klicke **"+ Integration hinzufügen"**
 3. Suche nach **"Laufschrift"**
-4. PC IP-Adresse und Name eingeben
+4. Geräte IP-Adresse und Name eingeben
+
+---
+
+## 📱 Android App Funktionen
+
+| Feature | Beschreibung |
+|---------|--------------|
+| 🌐 **Webserver** | Läuft auf Port 5000, von jedem Gerät erreichbar |
+| 📝 **Overlay** | Scrollt über allen Apps (auch Spiele, Homescreen) |
+| 📍 **Position** | Oben oder unten am Bildschirm |
+| ⚙️ **Einstellungen** | Textgröße (20-120 SP), Balkenhöhe (40-200 DP), Geschwindigkeit (1-20), Farbe (RGB + 8 Schnellfarben) |
+| 🔄 **Auto-Start** | Startet automatisch nach Geräte-Neustart |
+| 📺 **TV-optimiert** | Funktioniert auf Android TV Boxen |
+| 🔒 **Kein Root nötig** | Nutzt Android Overlay-Berechtigung |
+| 💾 **Einstellungen gespeichert** | Alle Einstellungen werden gespeichert |
+
+### Android REST API Beispiele
+
+- Text senden: http://[GERÄTE-IP]:5000/text/Hallo%20Welt
+- Position ändern: http://[GERÄTE-IP]:5000/position/bottom
+- Farbe ändern: http://[GERÄTE-IP]:5000/red/255
+- Geschwindigkeit: http://[GERÄTE-IP]:5000/speed/10
+
+### 🎯 Typische Anwendung
+
+**Szenario:** TV läuft, jemand klingelt an der Tür
+
+1. Home Assistant sendet Text an App
+2. Laufschrift erscheint über dem TV-Bild
+3. "🔔 Jemand an der Tür!" scrollt vorbei
+4. Verschwindet automatisch
+
+**Perfekt für:** Türklingel, Waschmaschine fertig, Warnungen, Erinnerungen
 
 ---
 
@@ -249,59 +346,6 @@ MIT License
 ---
 
 Made with ❤️ in Switzerland 🇨🇭 | Entwickelt mit ❤️ in der Schweiz 🇨🇭
-
-
-## ✨ Funktionen
-
-*   **Text einstellen:** Ändere den angezeigten Text der Laufschrift.
-*   **Helligkeit einstellen:** Passe die Helligkeit der Laufschrift an.
-*   **Geschwindigkeit einstellen:** Ändere die Geschwindigkeit, mit der der Text auf der Laufschrift läuft.
-*   **Farbe einstellen:** Wähle die Farbe des Textes auf der Laufschrift.
-*   **PC herunterfahren:** Schalter zum Herunterfahren des PCs, auf dem die Laufschrift-Software läuft.
-
-## Software-Verhalten 🖥️
-
-Die Laufschrift-Software auf deinem PC zeigt den Text in einem Fenster an. Folgendes Verhalten ist zu beachten:
-
-*   **Initialisierung:** Nach dem Start minimiert sich das Fenster automatisch in den Hintergrund.
-*   **Textanzeige:** Wenn ein neuer Text über Home Assistant gesendet wird, erscheint das Fenster kurzzeitig (Pop-up), zeigt den Text einmalig an und minimiert sich danach wieder automatisch in den Hintergrund.
-*   **Einmalige Anzeige:** Der Text wird nur einmal angezeigt, nicht in einer Endlosschleife.
-
-## ✅ Voraussetzungen
-
-*   Home Assistant 2023.1 oder höher
-*   HACS (Home Assistant Community Store)
-
-## 🚀 Installation
-
-1.  Füge dieses Repository als Custom Repository in HACS hinzu:
-    *   Repository: `richieam93/homeassistant-laufschrift`
-    *   Kategorie: Integration
-2.  Installiere die "Laufschrift" Integration über HACS.
-3.  Starte Home Assistant neu.
-
-## ⚙️ Konfiguration
-
-1.  **Laufschrift-Software starten:**
-    *   Stelle sicher, dass die Laufschrift-Software auf dem PC gestartet ist, bevor du die Integration installierst. Du findest sie im Ordner `homeassistant-laufschrift\Laufschrift_exe`.
-    *   Du kannst die Software manuell starten oder ein Skript verwenden.
-2.  **Integration hinzufügen:**
-    *   Gehe zu "Konfiguration" -> "Integrationen" in Home Assistant.
-    *   Klicke auf den "+ Integration hinzufügen" Button und suche nach "Laufschrift".
-    *   Gib die IP-Adresse und den Namen deines PCs ein, auf dem die Laufschrift-App ausgeführt wird.
-3.  **Optionen konfigurieren:**
-    *   Nach der Installation kannst du die Standardwerte für Helligkeit und Geschwindigkeit über die "Optionen" der Integration anpassen.
-
-## 💡 Verwendung
-
-Nach der Konfiguration werden folgende Entitäten erstellt (beachte, dass `NAME` durch den von dir vergebenen Namen ersetzt wird):
-*   `text.laufschrift_NAME_text`: Ermöglicht das Einstellen des Textes, der auf der Laufschrift angezeigt wird.
-*   `select.laufschrift_NAME_brightness`: Ermöglicht die Auswahl der Helligkeit.
-*   `select.laufschrift_NAME_speed`: Ermöglicht die Auswahl der Geschwindigkeit.
-*   `select.laufschrift_NAME_color`: Ermöglicht die Auswahl der Farbe.
-*   `switch.laufschrift_NAME_pc_herunterfahren`: Schalter zum Herunterfahren des PCs.
-
-Du kannst diese Entitäten in deinen Automatisierungen und Skripten verwenden.
 
 
 ### Text Automation:
