@@ -231,7 +231,7 @@ Sende Text von Home Assistant an deinen PC/TV/Android. Der Text erscheint kurz a
 | Plattform | Anforderungen |
 |-----------|---------------|
 | **Windows** | Windows PC |
-| **Android** | Android 5.0+ / Android TV |
+| **Android** | Android 6.0+ / Android TV |
 | **Home Assistant** | 2023.1 oder höher + HACS |
 
 ---
