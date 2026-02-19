@@ -1,16 +1,16 @@
 """Platform for sensor integration."""
 import logging
+
 from homeassistant.components.sensor import (
     SensorEntity,
     SensorDeviceClass,
     SensorStateClass,
 )
-# from homeassistant.const import UNIT_LUMEN  # Nicht mehr direkt benötigt
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN
+from .const import DOMAIN, DEFAULT_PORT
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -23,105 +23,105 @@ async def async_setup_entry(
     """Set up the sensor platform."""
     _LOGGER.info("Setting up sensor platform")
     host = config_entry.data.get("host")
+    port = config_entry.data.get("port", DEFAULT_PORT)
+    name = config_entry.data.get("name")
 
-    async_add_entities(
-        [
-            LaufschriftTextSensor(host),
-            LaufschriftBrightnessSensor(host),
-            LaufschriftSpeedSensor(host),
-        ]
-    )
+    async_add_entities([
+        LaufschriftTextSensor(host, port, name),
+        LaufschriftBrightnessSensor(host, port, name),
+        LaufschriftSpeedSensor(host, port, name),
+    ])
 
 
-class LaufschriftSensor(SensorEntity):
+# =============================================================================
+# Basis-Klasse für alle Sensor-Entitäten
+# =============================================================================
+
+class LaufschriftSensorBase(SensorEntity):
     """Base class for Laufschrift sensors."""
 
-    _attr_has_entity_name = True  # Wichtig für neue Integrationen
+    _attr_has_entity_name = True
 
-    def __init__(self, host: str, name: str) -> None:
+    def __init__(
+        self,
+        host: str,
+        port: int,
+        device_name: str,
+        sensor_name: str,
+        icon: str,
+    ) -> None:
         """Initialize the sensor."""
         self._host = host
-        self._name = name
-        self._attr_available = False  # Starte im nicht verfügbaren Zustand
+        self._port = port
+        self._device_name = device_name
+        self._attr_available = True
         self._value = None
-        self._attr_unique_id = f"laufschrift_{name.lower()}"  # Unique ID mit laufschrift_ beginnen
-
-    async def async_update(self) -> None:
-        """Update the sensor's state."""
-        try:
-            new_value = await self.get_laufschrift_value()
-            if new_value is not None:
-                self._attr_available = True
-                self._value = new_value
-            else:
-                self._attr_available = False  # Wert konnte nicht abgerufen werden
-        except Exception as e:
-            _LOGGER.error(f"Error updating sensor: {e}")
-            self._attr_available = False
-
-    async def get_laufschrift_value(self):
-        """Get the value from the Laufschrift."""
-        # Überschreibe diese Methode in den Unterklassen, um den spezifischen Wert abzurufen
-        raise NotImplementedError()
+        self._attr_unique_id = f"laufschrift_{host}_{device_name}_{sensor_name.lower().replace(' ', '_')}_sensor"
+        self._attr_name = f"{device_name} {sensor_name}"
+        self._attr_icon = icon
 
     @property
-    def state(self):
+    def native_value(self):
         """Return the state of the sensor."""
         return self._value
 
-    @property
-    def name(self):
-        """Return the name of the sensor."""
-        return f"Laufschrift {self._name}"
+
+# =============================================================================
+# Text Sensor
+# =============================================================================
+
+class LaufschriftTextSensor(LaufschriftSensorBase):
+    """Representation of the Laufschrift text sensor."""
+
+    def __init__(self, host: str, port: int, name: str) -> None:
+        """Initialize the sensor."""
+        super().__init__(
+            host, port, name,
+            sensor_name="Aktueller Text",
+            icon="mdi:text",
+        )
+        self._value = "Kein Text"
 
 
-class LaufschriftTextSensor(LaufschriftSensor):
-    """Representation of the Laufschrift text."""
+# =============================================================================
+# Helligkeit Sensor
+# =============================================================================
 
-    def __init__(self, host: str) -> None:
-        super().__init__(host, "Text")
-    _attr_unique_id = "laufschrift_text"
+class LaufschriftBrightnessSensor(LaufschriftSensorBase):
+    """Representation of the Laufschrift brightness sensor."""
 
-    async def get_laufschrift_value(self) -> str | None:
-        """Get the text from the Laufschrift."""
-        # Hier musst Du die Logik implementieren, um den Text von Deiner Laufschrift-App abzurufen
-        # Zum Beispiel durch Senden einer HTTP-Anfrage
-        # Rückgabe des Textes oder None, falls ein Fehler auftritt
-        return "Hallo, Welt!"  # Dummy-Wert
-
-
-class LaufschriftBrightnessSensor(LaufschriftSensor):
-    """Representation of the Laufschrift brightness."""
-
-    def __init__(self, host: str) -> None:
-        super().__init__(host, "Brightness")
-    _attr_unique_id = "laufschrift_brightness"
     _attr_device_class = SensorDeviceClass.ILLUMINANCE
     _attr_state_class = SensorStateClass.MEASUREMENT
-    #_attr_native_unit_of_measurement = "lm"
+
+    def __init__(self, host: str, port: int, name: str) -> None:
+        """Initialize the sensor."""
+        super().__init__(
+            host, port, name,
+            sensor_name="Aktuelle Helligkeit",
+            icon="mdi:brightness-6",
+        )
+        self._value = 230
+
     @property
     def native_unit_of_measurement(self):
-      return None
-
-    async def get_laufschrift_value(self) -> int | None:
-        """Get the brightness from the Laufschrift."""
-        # Hier musst Du die Logik implementieren, um die Helligkeit von Deiner Laufschrift-App abzurufen
-        # Zum Beispiel durch Senden einer HTTP-Anfrage
-        # Rückgabe der Helligkeit oder None, falls ein Fehler auftritt
-        return 230  # Dummy-Wert
+        """Return the unit of measurement."""
+        return None
 
 
-class LaufschriftSpeedSensor(LaufschriftSensor):
-    """Representation of the Laufschrift speed."""
+# =============================================================================
+# Geschwindigkeit Sensor
+# =============================================================================
 
-    def __init__(self, host: str) -> None:
-        super().__init__(host, "Speed")
-    _attr_unique_id = "laufschrift_speed"
+class LaufschriftSpeedSensor(LaufschriftSensorBase):
+    """Representation of the Laufschrift speed sensor."""
+
     _attr_state_class = SensorStateClass.MEASUREMENT
 
-    async def get_laufschrift_value(self) -> int | None:
-        """Get the speed from the Laufschrift."""
-        # Hier musst Du die Logik implementieren, um die Geschwindigkeit von Deiner Laufschrift-App abzurufen
-        # Zum Beispiel durch Senden einer HTTP-Anfrage
-        # Rückgabe der Geschwindigkeit oder None, falls ein Fehler auftritt
-        return 3  # Dummy-Wert
+    def __init__(self, host: str, port: int, name: str) -> None:
+        """Initialize the sensor."""
+        super().__init__(
+            host, port, name,
+            sensor_name="Aktuelle Geschwindigkeit",
+            icon="mdi:speedometer",
+        )
+        self._value = 3

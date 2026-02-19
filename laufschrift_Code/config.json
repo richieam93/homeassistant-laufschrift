@@ -1,1 +1,18 @@
-{"width": 800, "height": 65, "font_size": 36, "black": [0, 0, 0], "white": [255, 255, 255], "text": "test", "brightness": 230, "speed": 3}
+{
+    "text": "Hallo, Welt!",
+    "brightness": 230,
+    "speed": 5,
+    "red": 255,
+    "green": 255,
+    "blue": 255,
+    "mode": "static",
+    "repeat": 2,
+    "duration": 4,
+    "textsize": "gross",
+    "position": "oben",
+    "direction": "rtl",
+    "priority": "normal",
+    "transparency": 0,
+    "bar_height": 80,
+    "port": 5000
+}

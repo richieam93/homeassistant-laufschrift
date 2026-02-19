@@ -9,10 +9,17 @@ import voluptuous as vol
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, ServiceCall
-from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers import config_validation as cv
 
-from .const import DOMAIN, PLATFORMS, SERVICE_LAUFSCHRIFT_SET_TEXT, SERVICE_LAUFSCHRIFT_SHUTDOWN
+from .const import (
+    DOMAIN,
+    PLATFORMS,
+    DEFAULT_PORT,
+    SERVICE_LAUFSCHRIFT_SET_TEXT,
+    SERVICE_LAUFSCHRIFT_SHUTDOWN,
+    SERVICE_LAUFSCHRIFT_PAUSE,
+    SERVICE_LAUFSCHRIFT_RESUME,
+)
 
 _LOGGER: logging.Logger = logging.getLogger(__package__)
 
@@ -37,50 +44,69 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         hass.data.setdefault(DOMAIN, {})
 
     host = entry.data.get("host")
-    name = entry.data.get("name")  # Hole den Namen aus der ConfigEntry
+    name = entry.data.get("name")
+    port = entry.data.get("port", DEFAULT_PORT)
 
     session = aiohttp.ClientSession()
 
     hass.data[DOMAIN][entry.entry_id] = {
         "host": host,
-        "name": name,  # Speichere den Namen in den Daten
+        "name": name,
+        "port": port,
         "session": session,
     }
 
-    # Definiere die Service-Handler
+    # Helper-Funktion für API-Calls
+    async def async_api_call(endpoint: str):
+        """Make an API call to the Laufschrift."""
+        url = f"http://{host}:{port}{endpoint}"
+        try:
+            async with session.get(url) as response:
+                if response.status != 200:
+                    _LOGGER.error(f"API call failed: {url} - Status: {response.status}")
+                    return False
+                return True
+        except aiohttp.ClientError as e:
+            _LOGGER.error(f"Could not connect to Laufschrift: {e}")
+            return False
+
+    # Service Handler
     async def async_set_text_service(call: ServiceCall):
         """Service call to set the text."""
         text = call.data.get("text", "")
         _LOGGER.debug(f"Setting text to {text}")
-        await async_set_value(hass, entry, "text", text)
+        await async_api_call(f"/text/{text}")
 
     async def async_shutdown_service(call: ServiceCall):
         """Service call to shutdown the Laufschrift."""
         _LOGGER.info("Shutting down the Laufschrift")
-        await async_set_value(hass, entry, "shutdown", True)
+        await async_api_call("/shutdown")
 
-    async def async_set_value(hass: HomeAssistant, entry: ConfigEntry, parameter: str, value):
-        """Set a value on the Laufschrift."""
-        host = entry.data.get("host")
-        session = hass.data[DOMAIN][entry.entry_id]["session"]
-        try:
-            if parameter == "text":
-                url = f"http://{host}:5000/text/{value}"
-            elif parameter == "shutdown":
-                url = f"http://{host}:5000/shutdown"
-            else:
-                _LOGGER.error(f"Invalid parameter: {parameter}")
-                return
+    async def async_pause_service(call: ServiceCall):
+        """Service call to pause the Laufschrift."""
+        _LOGGER.info("Pausing the Laufschrift")
+        await async_api_call("/pause")
 
-            async with session.get(url) as response:
-                if response.status != 200:
-                    _LOGGER.error(f"Error setting {parameter}: {response.status}")
-        except aiohttp.ClientError as e:
-            _LOGGER.error(f"Could not connect to Laufschrift: {e}")
+    async def async_resume_service(call: ServiceCall):
+        """Service call to resume the Laufschrift."""
+        _LOGGER.info("Resuming the Laufschrift")
+        await async_api_call("/resume")
 
     # Registriere die Services
-    hass.services.async_register(DOMAIN, SERVICE_LAUFSCHRIFT_SET_TEXT, async_set_text_service)
+    hass.services.async_register(
+        DOMAIN, 
+        SERVICE_LAUFSCHRIFT_SET_TEXT, 
+        async_set_text_service,
+        schema=vol.Schema({
+            vol.Required("text"): cv.string,
+        })
+    )
     hass.services.async_register(DOMAIN, SERVICE_LAUFSCHRIFT_SHUTDOWN, async_shutdown_service)
+    hass.services.async_register(DOMAIN, SERVICE_LAUFSCHRIFT_PAUSE, async_pause_service)
+    hass.services.async_register(DOMAIN, SERVICE_LAUFSCHRIFT_RESUME, async_resume_service)
+
+    # Speichere die api_call Funktion für andere Plattformen
+    hass.data[DOMAIN][entry.entry_id]["async_api_call"] = async_api_call
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
@@ -96,8 +122,15 @@ async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
+    # Session schließen
     session = hass.data[DOMAIN][entry.entry_id]["session"]
     await session.close()
+
+    # Services entfernen
+    hass.services.async_remove(DOMAIN, SERVICE_LAUFSCHRIFT_SET_TEXT)
+    hass.services.async_remove(DOMAIN, SERVICE_LAUFSCHRIFT_SHUTDOWN)
+    hass.services.async_remove(DOMAIN, SERVICE_LAUFSCHRIFT_PAUSE)
+    hass.services.async_remove(DOMAIN, SERVICE_LAUFSCHRIFT_RESUME)
 
     unload_ok = all(
         await asyncio.gather(

@@ -1,26 +1,261 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
-    <title>Laufschrift-Konfiguration</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laufschrift</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+            padding: 35px;
+        }
+        h1 { text-align: center; margin-bottom: 5px; color: #333; }
+        .sub { text-align: center; color: #777; margin-bottom: 30px; }
+        
+        .msg {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .msg.ok { background: #4CAF50; color: #fff; }
+        .msg.err { background: #f44336; color: #fff; }
+        
+        .box {
+            background: #f5f7fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-left: 4px solid #667eea;
+        }
+        .box h2 { color: #667eea; margin-bottom: 15px; font-size: 1.2em; }
+        
+        .row { display: flex; gap: 15px; flex-wrap: wrap; }
+        .row > div { flex: 1; min-width: 200px; }
+        
+        label { display: block; margin-bottom: 6px; font-weight: 600; color: #444; }
+        
+        input[type="text"], select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+        input[type="text"]:focus, select:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+        
+        input[type="range"] { width: 100%; margin-top: 5px; }
+        
+        .val {
+            display: inline-block;
+            background: #667eea;
+            color: #fff;
+            padding: 2px 12px;
+            border-radius: 12px;
+            font-size: 0.9em;
+            margin-left: 8px;
+        }
+        
+        .colors { display: flex; gap: 12px; }
+        .colors > div { flex: 1; }
+        
+        .preview {
+            height: 45px;
+            border-radius: 8px;
+            margin-top: 12px;
+            border: 2px solid #ccc;
+        }
+        
+        .info {
+            background: #e8f4fd;
+            border: 1px solid #2196F3;
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 12px;
+            font-size: 0.9em;
+            color: #1565C0;
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+        button:hover { opacity: 0.9; }
+        .danger { background: linear-gradient(135deg, #ff6b6b, #ee5a5a); margin-top: 25px; }
+    </style>
 </head>
 <body>
-    <h1>Laufschrift-Konfiguration</h1>
-    <form method="post">
-        <label for="text">Text:</label><br>
-        <input type="text" id="text" name="text" value="{{ text }}"><br><br>
-        <label for="brightness">Helligkeit:</label><br>
-        <input type="number" id="brightness" name="brightness" min="0" max="255" value="{{ brightness }}"><br><br>
-        <label for="speed">Geschwindigkeit:</label><br>
-        <input type="number" id="speed" name="speed" value="{{ speed }}"><br><br>
-        <label for="red">Rot:</label><br>
-        <input type="number" id="red" name="red" min="0" max="255" value="{{ red }}"><br><br>
-        <label for="green">Grün:</label><br>
-        <input type="number" id="green" name="green" min="0" max="255" value="{{ green }}"><br><br>
-        <label for="blue">Blau:</label><br>
-        <input type="number" id="blue" name="blue" min="0" max="255" value="{{ blue }}"><br><br>
-        <input type="submit" value="Senden">
+<div class="container">
+    <h1>🖥️ Laufschrift Steuerung</h1>
+    <p class="sub">Version 2.1</p>
+    
+    {% if message %}
+    <div class="msg {% if '✅' in message %}ok{% else %}err{% endif %}">{{ message }}</div>
+    {% endif %}
+    
+    <form method="POST">
+        
+        <!-- TEXT -->
+        <div class="box">
+            <h2>📝 Text</h2>
+            <input type="text" name="text" value="{{ text }}" placeholder="Dein Text...">
+        </div>
+        
+        <!-- MODUS -->
+        <div class="box">
+            <h2>🎬 Anzeige</h2>
+            <div class="row">
+                <div>
+                    <label>Modus:</label>
+                    <select name="mode">
+                        <option value="scroll" {% if mode=='scroll' %}selected{% endif %}>🔄 Scroll</option>
+                        <option value="static" {% if mode=='static' %}selected{% endif %}>📌 Statisch</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Position am Bildschirm:</label>
+                    <select name="position">
+                        <option value="oben" {% if position=='oben' %}selected{% endif %}>⬆️ Oben</option>
+                        <option value="mitte" {% if position=='mitte' %}selected{% endif %}>↔️ Mitte</option>
+                        <option value="unten" {% if position=='unten' %}selected{% endif %}>⬇️ Unten</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row" style="margin-top:15px;">
+                <div>
+                    <label>Scroll-Richtung:</label>
+                    <select name="direction">
+                        <option value="rtl" {% if direction=='rtl' %}selected{% endif %}>← Rechts → Links</option>
+                        <option value="ltr" {% if direction=='ltr' %}selected{% endif %}>→ Links → Rechts</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Textgröße:</label>
+                    <select name="textsize">
+                        <option value="klein" {% if textsize=='klein' %}selected{% endif %}>Klein</option>
+                        <option value="mittel" {% if textsize=='mittel' %}selected{% endif %}>Mittel</option>
+                        <option value="gross" {% if textsize=='gross' %}selected{% endif %}>Groß</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ZEIT -->
+        <div class="box">
+            <h2>⏱️ Zeit</h2>
+            <div class="row">
+                <div>
+                    <label>Wiederholungen: <span class="val" id="vRepeat">{{ repeat }}x</span></label>
+                    <input type="range" name="repeat" min="1" max="10" value="{{ repeat }}"
+                           oninput="document.getElementById('vRepeat').textContent=this.value+'x'">
+                </div>
+                <div>
+                    <label>Statisch-Dauer: <span class="val" id="vDur">{{ duration }}s</span></label>
+                    <input type="range" name="duration" min="1" max="60" value="{{ duration }}"
+                           oninput="document.getElementById('vDur').textContent=this.value+'s'">
+                </div>
+            </div>
+        </div>
+        
+        <!-- FARBE -->
+        <div class="box">
+            <h2>🎨 Farbe</h2>
+            <div class="colors">
+                <div>
+                    <label>🔴 Rot: <span class="val" id="vR">{{ red }}</span></label>
+                    <input type="range" name="red" min="0" max="255" value="{{ red }}"
+                           oninput="document.getElementById('vR').textContent=this.value;upd()">
+                </div>
+                <div>
+                    <label>🟢 Grün: <span class="val" id="vG">{{ green }}</span></label>
+                    <input type="range" name="green" min="0" max="255" value="{{ green }}"
+                           oninput="document.getElementById('vG').textContent=this.value;upd()">
+                </div>
+                <div>
+                    <label>🔵 Blau: <span class="val" id="vB">{{ blue }}</span></label>
+                    <input type="range" name="blue" min="0" max="255" value="{{ blue }}"
+                           oninput="document.getElementById('vB').textContent=this.value;upd()">
+                </div>
+            </div>
+            <div class="preview" id="preview"></div>
+        </div>
+        
+        <!-- EINSTELLUNGEN -->
+        <div class="box">
+            <h2>⚙️ Einstellungen</h2>
+            <div class="row">
+                <div>
+                    <label>💡 Helligkeit: <span class="val" id="vBri">{{ brightness }}</span></label>
+                    <input type="range" name="brightness" min="0" max="255" value="{{ brightness }}"
+                           oninput="document.getElementById('vBri').textContent=this.value;upd()">
+                </div>
+                <div>
+                    <label>⚡ Geschwindigkeit: <span class="val" id="vSpd">{{ speed }}</span></label>
+                    <input type="range" name="speed" min="1" max="20" value="{{ speed }}"
+                           oninput="document.getElementById('vSpd').textContent=this.value">
+                </div>
+            </div>
+        </div>
+        
+        <!-- TRANSPARENZ -->
+        <div class="box">
+            <h2>👁️ Transparenz</h2>
+            <label>Fenster-Transparenz: <span class="val" id="vTrans">{{ transparency }}%</span></label>
+            <input type="range" name="transparency" min="0" max="90" value="{{ transparency }}"
+                   oninput="document.getElementById('vTrans').textContent=this.value+'%'">
+            <div class="info">💡 Bei 90% ist nur noch der Text sichtbar.</div>
+        </div>
+        
+        <!-- PRIORITÄT -->
+        <div class="box">
+            <h2>🎯 Priorität</h2>
+            <select name="priority">
+                <option value="normal" {% if priority=='normal' %}selected{% endif %}>⚪ Normal</option>
+                <option value="hoch" {% if priority=='hoch' %}selected{% endif %}>🟡 Hoch</option>
+                <option value="kritisch" {% if priority=='kritisch' %}selected{% endif %}>🔴 Kritisch</option>
+            </select>
+        </div>
+        
+        <button type="submit">✅ Absenden & Anzeigen</button>
     </form>
-    <br>
-    <button onclick="location.href='/shutdown'">PC Herunterfahren</button>
+    
+    <button class="danger" onclick="if(confirm('Wirklich?'))location='/shutdown'">🔌 PC Herunterfahren</button>
+</div>
+
+<script>
+function upd() {
+    const r = document.querySelector('[name=red]').value;
+    const g = document.querySelector('[name=green]').value;
+    const b = document.querySelector('[name=blue]').value;
+    const br = document.querySelector('[name=brightness]').value;
+    const f = br / 255;
+    document.getElementById('preview').style.background = 
+        `rgb(${Math.round(r*f)},${Math.round(g*f)},${Math.round(b*f)})`;
+}
+upd();
+</script>
 </body>
 </html>

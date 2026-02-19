@@ -1,23 +1,223 @@
-laufschrift_set_text:
-  description: Set the text to display on the Laufschrift.
+# Text setzen
+set_text:
+  name: Text setzen
+  description: Setzt den anzuzeigenden Text auf der Laufschrift.
   fields:
     text:
-      description: The text to display.
-      example: Hello, World!
+      name: Text
+      description: Der Text, der angezeigt werden soll.
+      required: true
+      example: "Hallo, Welt!"
+      selector:
+        text:
 
-laufschrift_set_brightness:
-  description: Set the brightness of the Laufschrift.
+# PC herunterfahren
+shutdown:
+  name: Herunterfahren
+  description: Fährt den PC/das Gerät mit der Laufschrift herunter.
+
+# Pause
+pause:
+  name: Pausieren
+  description: Pausiert die aktuelle Textanzeige.
+
+# Resume
+resume:
+  name: Fortsetzen
+  description: Setzt die pausierte Textanzeige fort.
+
+# Helligkeit setzen
+set_brightness:
+  name: Helligkeit setzen
+  description: Setzt die Helligkeit der Laufschrift.
   fields:
     brightness:
-      description: The brightness value (0-255).
-      example: 150
+      name: Helligkeit
+      description: Helligkeitswert (0-255).
+      required: true
+      example: 230
+      selector:
+        number:
+          min: 0
+          max: 255
+          mode: slider
 
-laufschrift_set_speed:
-  description: Set the speed of the Laufschrift.
+# Geschwindigkeit setzen
+set_speed:
+  name: Geschwindigkeit setzen
+  description: Setzt die Scroll-Geschwindigkeit der Laufschrift.
   fields:
     speed:
-      description: The speed value.
-      example: 5
+      name: Geschwindigkeit
+      description: Geschwindigkeitswert (1-10).
+      required: true
+      example: 3
+      selector:
+        number:
+          min: 1
+          max: 10
+          mode: slider
 
-laufschrift_shutdown:
-  description: Shutdown the Laufschrift.
+# Modus setzen
+set_mode:
+  name: Modus setzen
+  description: Setzt den Anzeigemodus (Scroll oder Statisch).
+  fields:
+    mode:
+      name: Modus
+      description: Der Anzeigemodus.
+      required: true
+      example: "scroll"
+      selector:
+        select:
+          options:
+            - "scroll"
+            - "static"
+
+# Wiederholungen setzen
+set_repeat:
+  name: Wiederholungen setzen
+  description: Setzt die Anzahl der Wiederholungen.
+  fields:
+    repeat:
+      name: Wiederholungen
+      description: Anzahl der Wiederholungen (1-10).
+      required: true
+      example: 3
+      selector:
+        number:
+          min: 1
+          max: 10
+          mode: slider
+
+# Anzeigedauer setzen
+set_duration:
+  name: Anzeigedauer setzen
+  description: Setzt die Anzeigedauer in Sekunden.
+  fields:
+    duration:
+      name: Dauer
+      description: Anzeigedauer in Sekunden (1-300).
+      required: true
+      example: 10
+      selector:
+        number:
+          min: 1
+          max: 300
+          mode: slider
+
+# Textgröße setzen
+set_textsize:
+  name: Textgröße setzen
+  description: Setzt die Textgröße.
+  fields:
+    textsize:
+      name: Textgröße
+      description: Die Textgröße (klein/mittel/gross).
+      required: true
+      example: "mittel"
+      selector:
+        select:
+          options:
+            - "klein"
+            - "mittel"
+            - "gross"
+
+# Position setzen
+set_position:
+  name: Position setzen
+  description: Setzt die vertikale Position des Texts.
+  fields:
+    position:
+      name: Position
+      description: Die Position (oben/mittig/unten).
+      required: true
+      example: "oben"
+      selector:
+        select:
+          options:
+            - "oben"
+            - "mittig"
+            - "unten"
+
+# Scroll-Richtung setzen
+set_direction:
+  name: Scroll-Richtung setzen
+  description: Setzt die Scroll-Richtung.
+  fields:
+    direction:
+      name: Richtung
+      description: Die Scroll-Richtung (ltr/rtl).
+      required: true
+      example: "ltr"
+      selector:
+        select:
+          options:
+            - "ltr"
+            - "rtl"
+
+# Priorität setzen
+set_priority:
+  name: Priorität setzen
+  description: Setzt die Priorität der Nachricht.
+  fields:
+    priority:
+      name: Priorität
+      description: Die Priorität (normal/hoch/kritisch).
+      required: true
+      example: "normal"
+      selector:
+        select:
+          options:
+            - "normal"
+            - "hoch"
+            - "kritisch"
+
+# Transparenz setzen
+set_transparency:
+  name: Transparenz setzen
+  description: Setzt die Hintergrund-Transparenz.
+  fields:
+    transparency:
+      name: Transparenz
+      description: Transparenz in Prozent (0-100).
+      required: true
+      example: 0
+      selector:
+        number:
+          min: 0
+          max: 100
+          mode: slider
+
+# Farbe setzen
+set_color:
+  name: Farbe setzen
+  description: Setzt die Textfarbe.
+  fields:
+    red:
+      name: Rot
+      description: Rotwert (0-255).
+      required: true
+      example: 255
+      selector:
+        number:
+          min: 0
+          max: 255
+    green:
+      name: Grün
+      description: Grünwert (0-255).
+      required: true
+      example: 255
+      selector:
+        number:
+          min: 0
+          max: 255
+    blue:
+      name: Blau
+      description: Blauwert (0-255).
+      required: true
+      example: 255
+      selector:
+        number:
+          min: 0
+          max: 255

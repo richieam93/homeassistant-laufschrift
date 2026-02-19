@@ -1,16 +1,21 @@
-"""Platform for number entity."""
+"""Platform for number entities."""
 import logging
-
 import aiohttp
-import voluptuous as vol
 
 from homeassistant.components.number import NumberEntity, NumberMode
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import UnitOfSpeed
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN
+from .const import (
+    DOMAIN,
+    DEFAULT_PORT,
+    DEFAULT_BRIGHTNESS,
+    DEFAULT_SPEED,
+    DEFAULT_REPEAT,
+    DEFAULT_DURATION,
+    DEFAULT_TRANSPARENCY,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -20,111 +25,220 @@ async def async_setup_entry(
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up the Laufschrift number platform."""
+    """Set up the number platform."""
     _LOGGER.info("Setting up number platform")
     host = config_entry.data.get("host")
+    port = config_entry.data.get("port", DEFAULT_PORT)
+    name = config_entry.data.get("name")
 
-    async_add_entities(
-        [
-            LaufschriftBrightnessNumber(host),
-            LaufschriftSpeedNumber(host),
-        ]
-    )
+    async_add_entities([
+        # Bestehende Numbers
+        LaufschriftBrightnessNumber(host, port, name, config_entry),
+        LaufschriftSpeedNumber(host, port, name, config_entry),
+        # Neue Numbers
+        LaufschriftRepeatNumber(host, port, name, config_entry),
+        LaufschriftDurationNumber(host, port, name, config_entry),
+        LaufschriftTransparencyNumber(host, port, name, config_entry),
+    ])
 
 
-class LaufschriftNumber(NumberEntity):
-    """Base class for Laufschrift numbers."""
+# =============================================================================
+# Basis-Klasse für alle Number-Entitäten
+# =============================================================================
 
-    _attr_has_entity_name = True  # Wichtig für neue Integrationen
+class LaufschriftNumberBase(NumberEntity):
+    """Base class for Laufschrift number entities."""
 
-    def __init__(self, host: str, name: str, mode: NumberMode, min_value: int, max_value: int) -> None:
-        """Initialize the Laufschrift number."""
+    def __init__(
+        self,
+        host: str,
+        port: int,
+        name: str,
+        config_entry: ConfigEntry,
+        number_name: str,
+        min_value: float,
+        max_value: float,
+        step: float,
+        default: float,
+        icon: str,
+        unit: str | None = None,
+        mode: NumberMode = NumberMode.SLIDER,
+    ) -> None:
+        """Initialize the entity."""
         self._host = host
-        self._name = name
-        self._attr_available = False
+        self._port = port
+        self._device_name = name
+        self.config_entry = config_entry
+        self._value = default
+        
+        self._attr_native_min_value = min_value
+        self._attr_native_max_value = max_value
+        self._attr_native_step = step
+        self._attr_native_value = default
         self._attr_mode = mode
-        self._attr_min_value = min_value
-        self._attr_max_value = max_value
-        self._value = None
-        self._attr_unique_id = f"laufschrift_{name.lower()}"
-
-    async def async_update(self) -> None:
-        """Update the number's state."""
-        try:
-            new_value = await self.get_laufschrift_value()
-            if new_value is not None:
-                self._attr_available = True
-                self._value = new_value
-            else:
-                self._attr_available = False
-        except Exception as e:
-            _LOGGER.error(f"Error updating number: {e}")
-            self._attr_available = False
-
-    async def get_laufschrift_value(self) -> str | None:
-        """Get the value from the Laufschrift."""
-        # Überschreibe diese Methode in den Unterklassen, um den spezifischen Wert abzurufen
-        raise NotImplementedError()
-
-    async def set_laufschrift_value(self, value: float) -> None:
-        """Send the value to the Laufschrift."""
-        # Überschreibe diese Methode in den Unterklassen, um den spezifischen Wert an die Laufschrift-App zu senden
-        raise NotImplementedError()
+        self._attr_unique_id = f"laufschrift_{host}_{name}_{number_name.lower().replace(' ', '_')}"
+        self._attr_name = f"{name} {number_name}"
+        self._attr_icon = icon
+        
+        if unit:
+            self._attr_native_unit_of_measurement = unit
 
     @property
-    def state(self) -> str | None:
-        """Return the state of the number."""
+    def native_value(self) -> float | None:
+        """Return the current value."""
         return self._value
 
+    async def _send_command(self, endpoint: str) -> None:
+        """Send command to Laufschrift."""
+        try:
+            async with aiohttp.ClientSession() as session:
+                url = f"http://{self._host}:{self._port}{endpoint}"
+                _LOGGER.debug(f"Sending command: {url}")
+                async with session.get(url) as response:
+                    if response.status != 200:
+                        _LOGGER.error(f"Error sending command: {response.status}")
+        except aiohttp.ClientError as e:
+            _LOGGER.error(f"Could not connect to Laufschrift: {e}")
+
+
+# =============================================================================
+# Helligkeit Number
+# =============================================================================
+
+class LaufschriftBrightnessNumber(LaufschriftNumberBase):
+    """Representation of a Laufschrift brightness number."""
+
+    def __init__(self, host: str, port: int, name: str, config_entry: ConfigEntry) -> None:
+        """Initialize the entity."""
+        default = int(config_entry.options.get("brightness", DEFAULT_BRIGHTNESS))
+        super().__init__(
+            host, port, name, config_entry,
+            number_name="Helligkeit Slider",
+            min_value=0,
+            max_value=255,
+            step=1,
+            default=default,
+            icon="mdi:brightness-6",
+        )
+
     async def async_set_native_value(self, value: float) -> None:
-        """Set new value."""
-        await self.set_laufschrift_value(value)
-        self._attr_native_value = value
+        """Set the brightness value."""
+        _LOGGER.debug(f"Setting brightness to: {value}")
+        self._value = int(value)
+        await self._send_command(f"/brightness/{int(value)}")
         self.async_write_ha_state()
-class LaufschriftBrightnessNumber(LaufschriftNumber):
-    """Representation of the Laufschrift brightness number."""
 
-    def __init__(self, host: str) -> None:
-        super().__init__(host, "Helligkeit", NumberMode.SLIDER, 0, 255)
 
-    async def get_laufschrift_value(self) -> int | None:
-        """Get the brightness from the Laufschrift."""
-        # Hier musst Du die Logik implementieren, um die Helligkeit von Deiner Laufschrift-App abzurufen
-        # Zum Beispiel durch Senden einer HTTP-Anfrage
-        # Rückgabe der Helligkeit oder None, falls ein Fehler auftritt
-        return 230  # Dummy-Wert
+# =============================================================================
+# Geschwindigkeit Number
+# =============================================================================
 
-    async def set_laufschrift_value(self, value: float) -> None:
-        """Send the brightness value to the Laufschrift."""
-        try:
-            async with aiohttp.ClientSession() as session:
-                url = f"http://{self._host}:5000/set_brightness/{int(value)}"
-                async with session.get(url) as response:
-                    if response.status != 200:
-                        _LOGGER.error(f"Error setting brightness: {response.status}")
-        except aiohttp.ClientError as e:
-            _LOGGER.error(f"Could not connect to Laufschrift: {e}")
-class LaufschriftSpeedNumber(LaufschriftNumber):
-    """Representation of the Laufschrift speed number."""
+class LaufschriftSpeedNumber(LaufschriftNumberBase):
+    """Representation of a Laufschrift speed number."""
 
-    def __init__(self, host: str) -> None:
-        super().__init__(host, "Geschwindigkeit", NumberMode.SLIDER, 1, 10)
-        self._attr_native_unit_of_measurement = UnitOfSpeed.MILES_PER_HOUR
+    def __init__(self, host: str, port: int, name: str, config_entry: ConfigEntry) -> None:
+        """Initialize the entity."""
+        default = int(config_entry.options.get("speed", DEFAULT_SPEED))
+        super().__init__(
+            host, port, name, config_entry,
+            number_name="Geschwindigkeit Slider",
+            min_value=1,
+            max_value=10,
+            step=1,
+            default=default,
+            icon="mdi:speedometer",
+        )
 
-    async def get_laufschrift_value(self) -> int | None:
-        """Get the speed from the Laufschrift."""
-        # Hier musst Du die Logik implementieren, um die Geschwindigkeit von Deiner Laufschrift-App abzurufen
-        # Zum Beispiel durch Senden einer HTTP-Anfrage
-        # Rückgabe der Geschwindigkeit oder None, falls ein Fehler auftritt
-        return 3  # Dummy-Wert
+    async def async_set_native_value(self, value: float) -> None:
+        """Set the speed value."""
+        _LOGGER.debug(f"Setting speed to: {value}")
+        self._value = int(value)
+        await self._send_command(f"/speed/{int(value)}")
+        self.async_write_ha_state()
 
-    async def set_laufschrift_value(self, value: float) -> None:
-        """Send the speed value to the Laufschrift."""
-        try:
-            async with aiohttp.ClientSession() as session:
-                url = f"http://{self._host}:5000/set_speed/{int(value)}"
-                async with session.get(url) as response:
-                    if response.status != 200:
-                        _LOGGER.error(f"Error setting speed: {response.status}")
-        except aiohttp.ClientError as e:
-            _LOGGER.error(f"Could not connect to Laufschrift: {e}")
+
+# =============================================================================
+# 🆕 Wiederholungen Number
+# =============================================================================
+
+class LaufschriftRepeatNumber(LaufschriftNumberBase):
+    """Representation of a Laufschrift repeat number."""
+
+    def __init__(self, host: str, port: int, name: str, config_entry: ConfigEntry) -> None:
+        """Initialize the entity."""
+        default = int(config_entry.options.get("repeat", DEFAULT_REPEAT))
+        super().__init__(
+            host, port, name, config_entry,
+            number_name="Wiederholungen",
+            min_value=1,
+            max_value=10,
+            step=1,
+            default=default,
+            icon="mdi:repeat",
+            unit="x",
+        )
+
+    async def async_set_native_value(self, value: float) -> None:
+        """Set the repeat value."""
+        _LOGGER.debug(f"Setting repeat to: {value}")
+        self._value = int(value)
+        await self._send_command(f"/repeat/{int(value)}")
+        self.async_write_ha_state()
+
+
+# =============================================================================
+# 🆕 Anzeigedauer Number
+# =============================================================================
+
+class LaufschriftDurationNumber(LaufschriftNumberBase):
+    """Representation of a Laufschrift duration number."""
+
+    def __init__(self, host: str, port: int, name: str, config_entry: ConfigEntry) -> None:
+        """Initialize the entity."""
+        default = int(config_entry.options.get("duration", DEFAULT_DURATION))
+        super().__init__(
+            host, port, name, config_entry,
+            number_name="Anzeigedauer",
+            min_value=1,
+            max_value=300,
+            step=1,
+            default=default,
+            icon="mdi:timer-outline",
+            unit="s",
+        )
+
+    async def async_set_native_value(self, value: float) -> None:
+        """Set the duration value."""
+        _LOGGER.debug(f"Setting duration to: {value}")
+        self._value = int(value)
+        await self._send_command(f"/duration/{int(value)}")
+        self.async_write_ha_state()
+
+
+# =============================================================================
+# 🆕 Hintergrund-Transparenz Number
+# =============================================================================
+
+class LaufschriftTransparencyNumber(LaufschriftNumberBase):
+    """Representation of a Laufschrift transparency number."""
+
+    def __init__(self, host: str, port: int, name: str, config_entry: ConfigEntry) -> None:
+        """Initialize the entity."""
+        default = int(config_entry.options.get("transparency", DEFAULT_TRANSPARENCY))
+        super().__init__(
+            host, port, name, config_entry,
+            number_name="Transparenz",
+            min_value=0,
+            max_value=100,
+            step=1,
+            default=default,
+            icon="mdi:opacity",
+            unit="%",
+        )
+
+    async def async_set_native_value(self, value: float) -> None:
+        """Set the transparency value."""
+        _LOGGER.debug(f"Setting transparency to: {value}")
+        self._value = int(value)
+        await self._send_command(f"/transparency/{int(value)}")
+        self.async_write_ha_state()
