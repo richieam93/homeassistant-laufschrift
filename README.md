@@ -25,10 +25,10 @@ If it helps you, I'd appreciate a coffee. Wenn es dir hilft, freue ich mich übe
 | Feature | Status |
 |---------|--------|
 | 🇩🇪 German UI | ✅ Ready |
-| 🇬🇧 English UI | 🚧 Coming soon |
+| 🇬🇧 English UI | ✅ Ready |
 | 🖥️ Windows | ✅ Ready (v2.0 - Complete Rewrite!) |
 | 📱 Android / Android TV | ✅ Ready (v2.0 - Complete Rewrite!) |
-| 🐧 Linux/Mac | 🚧 Coming soon |
+| 🐧 Linux | ✅ Ready Python Skript |
 
 ---
 
