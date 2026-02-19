@@ -25,7 +25,7 @@ If it helps you, I'd appreciate a coffee. Wenn es dir hilft, freue ich mich übe
 | Feature | Status |
 |---------|--------|
 | 🇩🇪 German UI | ✅ Ready |
-| 🇬🇧 English UI | ✅ Ready |
+| 🇬🇧 English UI | ----- |
 | 🖥️ Windows | ✅ Ready (v2.0 - Complete Rewrite!) |
 | 📱 Android / Android TV | ✅ Ready (v2.0 - Complete Rewrite!) |
 | 🐧 Linux | ✅ Ready Python Skript |
