@@ -78,7 +78,7 @@ class LaufschriftConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             async with aiohttp.ClientSession() as session:
                 async with session.get(
                     f"http://{host}:{port}/",
-                    timeout=aiohttp.ClientTimeout(total=5)
+                    timeout=aiohttp.ClientTimeout(total=60)
                 ) as response:
                     return response.status == 200
         except Exception as e:
