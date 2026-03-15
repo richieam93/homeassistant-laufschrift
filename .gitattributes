@@ -1,0 +1,10 @@
+# Ordner vom HACS-Export ausschließen
+Laufschrift_exe/ export-ignore
+laufschrift_Code/ export-ignore
+laufschrift_app/ export-ignore
+example/ export-ignore
+
+# Zusätzlich: GitHub-spezifische Dateien ausschließen
+.github/ export-ignore
+.gitignore export-ignore
+.gitattributes export-ignore
