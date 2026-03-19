@@ -501,8 +501,47 @@ def index():
         transparency=transparency
     )
 
+# ✅ NEU: POST /text (für lange Texte - KEINE Limits!)
+@app.route('/text', methods=['POST'])
+def api_text_post():
+    global text, is_visible
+    
+    # Text aus POST-Body lesen
+    text = request.form.get('text', '') or request.form.get('value', '')
+    
+    if not text:
+        # Falls JSON gesendet wurde
+        try:
+            json_data = request.get_json(silent=True)
+            if json_data:
+                text = json_data.get('text', '') or json_data.get('value', '')
+        except:
+            pass
+    
+    if text:
+        is_visible = True
+        save_config()
+        return f"OK: {len(text)} chars received"
+    
+    return "Error: No text provided", 400
+
+# ✅ NEU: GET /text?value=... (Query-Parameter, bis ~2000 Zeichen)
+@app.route('/text', methods=['GET'])
+def api_text_query():
+    global text, is_visible
+    
+    text = request.args.get('value', '') or request.args.get('text', '')
+    
+    if text:
+        is_visible = True
+        save_config()
+        return f"OK: {len(text)} chars"
+    
+    return "Error: Use /text?value=YourText or POST /text", 400
+
+# Alte Methode: GET /text/... (Fallback, limitiert bei langen URLs)
 @app.route('/text/<path:new_text>')
-def api_text(new_text):
+def api_text_path(new_text):
     global text, is_visible
     text = unquote(new_text)
     is_visible = True
