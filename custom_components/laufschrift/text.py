@@ -40,6 +40,7 @@ class LaufschriftTextEntity(TextEntity):
         self._attr_unique_id = f"laufschrift_{host}_{name}_text"
         self._attr_name = f"{name} Text"
         self._attr_icon = "mdi:text"
+        self._attr_native_max = 10000  # Erlaubt bis zu 10000 Zeichen!
 
     @property
     def native_value(self) -> str | None:
@@ -48,18 +49,34 @@ class LaufschriftTextEntity(TextEntity):
 
     async def async_set_value(self, value: str) -> None:
         """Set the text value."""
-        _LOGGER.debug(f"Setting text to: {value}")
+        _LOGGER.debug(f"Setting text ({len(value)} chars): {value[:80]}...")
         self._text = value
         await self._send_text(value)
         self.async_write_ha_state()
 
     async def _send_text(self, text: str) -> None:
-        """Send the text to the Laufschrift."""
+        """Send the text to the Laufschrift via POST (unlimited length)."""
         try:
             async with aiohttp.ClientSession() as session:
-                url = f"http://{self._host}:{self._port}/text/{text}"
-                async with session.get(url) as response:
-                    if response.status != 200:
-                        _LOGGER.error(f"Error setting text: {response.status}")
+                url = f"http://{self._host}:{self._port}/text"
+                
+                # POST für lange Texte (keine Längenbeschränkung!)
+                async with session.post(
+                    url,
+                    data={"text": text},
+                    timeout=aiohttp.ClientTimeout(total=10)
+                ) as response:
+                    if response.status == 200:
+                        _LOGGER.debug(f"Text sent successfully ({len(text)} chars)")
+                    else:
+                        _LOGGER.error(f"Error sending text: {response.status}")
+                        
+                        # Fallback: GET-Methode versuchen
+                        _LOGGER.debug("Trying GET fallback...")
+                        fallback_url = f"http://{self._host}:{self._port}/text/{text}"
+                        async with session.get(fallback_url) as fallback_response:
+                            if fallback_response.status != 200:
+                                _LOGGER.error(f"GET fallback also failed: {fallback_response.status}")
+
         except aiohttp.ClientError as e:
             _LOGGER.error(f"Could not connect to Laufschrift: {e}")
