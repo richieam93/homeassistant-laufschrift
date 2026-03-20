@@ -26,6 +26,7 @@ async def async_setup_entry(
     async_add_entities([
         LaufschriftShutdownSwitch(host, port, name, config_entry),
         LaufschriftPauseSwitch(host, port, name, config_entry),
+        LaufschriftWakeScreenSwitch(host, port, name, config_entry),  
     ])
 
 
@@ -105,6 +106,55 @@ class LaufschriftPauseSwitch(SwitchEntity):
         self._is_on = False
         self.async_write_ha_state()
         await self._send_command("/resume")
+
+    async def _send_command(self, endpoint: str) -> None:
+        """Send command to Laufschrift."""
+        try:
+            async with aiohttp.ClientSession() as session:
+                url = f"http://{self._host}:{self._port}{endpoint}"
+                async with session.get(url) as response:
+                    if response.status != 200:
+                        _LOGGER.error(f"Error sending command: {response.status}")
+        except aiohttp.ClientError as e:
+            _LOGGER.error(f"Could not connect to Laufschrift: {e}")
+            
+            
+# =============================================================================
+# 🆕 Display aufwecken Switch
+# =============================================================================
+
+class LaufschriftWakeScreenSwitch(SwitchEntity):
+    """Representation of a Laufschrift wake screen switch."""
+
+    def __init__(self, host: str, port: int, name: str, config_entry: ConfigEntry) -> None:
+        """Initialize the entity."""
+        self._host = host
+        self._port = port
+        self._name = name
+        self.config_entry = config_entry
+        self._is_on = True  # Default: AN
+        self._attr_unique_id = f"laufschrift_{host}_{name}_wakescreen"
+        self._attr_name = f"{name} Display aufwecken"
+        self._attr_icon = "mdi:monitor-eye"
+
+    @property
+    def is_on(self) -> bool:
+        """Return True if wake screen is enabled."""
+        return self._is_on
+
+    async def async_turn_on(self, **kwargs) -> None:
+        """Enable wake screen."""
+        _LOGGER.info("Enabling wake screen")
+        self._is_on = True
+        self.async_write_ha_state()
+        await self._send_command("/wakescreen/on")
+
+    async def async_turn_off(self, **kwargs) -> None:
+        """Disable wake screen."""
+        _LOGGER.info("Disabling wake screen")
+        self._is_on = False
+        self.async_write_ha_state()
+        await self._send_command("/wakescreen/off")
 
     async def _send_command(self, endpoint: str) -> None:
         """Send command to Laufschrift."""

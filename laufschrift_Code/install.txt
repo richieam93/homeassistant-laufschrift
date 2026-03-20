@@ -1,0 +1,1 @@
+pyinstaller --onefile --noconsole --add-data "templates;templates" --add-data "config.json;." --hidden-import=pygame --hidden-import=flask laufschrift_app.py
