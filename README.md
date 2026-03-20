@@ -787,6 +787,37 @@ Oder mit Slider:
           entity_id: switch.laufschrift_NAME_shutdown
 
 
+
+
+
+### Für lange texte
+
+      Home Assistant - Neue Konfiguration (Empfohlen)
+      Damit ihr die volle Länge nutzen könnt, stellt in der configuration.yaml auf die POST-Methode um:
+
+      rest_command:
+        # POST für unbegrenzt lange Texte (empfohlen!)
+        laufschrift_post:
+          url: "http://DEINE_TABLET_IP:5000/text"
+          method: POST
+          content_type: "application/x-www-form-urlencoded"
+          payload: "text={{ text | urlencode }}"
+
+
+### Beispiel: Automation für Tagesschau
+
+      alias: "Laufschrift: Tagesschau News"
+      description: Schickt unbegrenzt lange News direkt an das Tablet
+      triggers:
+        - minutes: /10
+          trigger: time_pattern
+      actions:
+        - data:
+            text: "📰 Tagesschau: {{ states('sensor.tagesschau_news_komplett') }}"
+          action: rest_command.laufschrift_post
+      mode: single
+
+
 ---
 
 ## ☕ Support this Project / Unterstütze dieses Projekt
