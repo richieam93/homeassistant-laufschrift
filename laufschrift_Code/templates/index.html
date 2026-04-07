@@ -238,6 +238,20 @@
                 <option value="kritisch" {% if priority=='kritisch' %}selected{% endif %}>🔴 Kritisch</option>
             </select>
         </div>
+
+        <!-- ENERGIESPAREN -->
+        <div class="box">
+            <h2>🌙 Energiesparen</h2>
+            <label style="display:flex; align-items:center; gap:10px; cursor:pointer; margin-bottom:0;">
+                <input type="checkbox" name="prevent_sleep_while_visible" value="1"
+                       {% if prevent_sleep_while_visible %}checked{% endif %}
+                       style="width:20px; height:20px;">
+                <span>Schlafmodus während sichtbarer Laufschrift verhindern</span>
+            </label>
+            <div class="info">
+                💡 Empfohlen: deaktiviert lassen. Dann darf Windows den Bildschirm abschalten oder den PC in den Schlafmodus versetzen.
+            </div>
+        </div>
         
         <button type="submit">✅ Absenden & Anzeigen</button>
     </form>

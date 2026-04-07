@@ -17,12 +17,14 @@ from urllib.parse import unquote
 import ctypes
 import subprocess
 import json
+import atexit
 
 # =============================================================================
 # Windows API Konstanten
 # =============================================================================
 
 user32 = ctypes.windll.user32
+kernel32 = ctypes.windll.kernel32
 
 # Window Position Flags
 HWND_TOPMOST = -1
@@ -37,6 +39,12 @@ SW_MINIMIZE = 6
 SW_RESTORE = 9
 SW_SHOW = 5
 SW_SHOWNA = 8
+
+# Power Management
+ES_AWAYMODE_REQUIRED = 0x00000040
+ES_CONTINUOUS = 0x80000000
+ES_DISPLAY_REQUIRED = 0x00000002
+ES_SYSTEM_REQUIRED = 0x00000001
 
 # =============================================================================
 # Pfade für EXE
@@ -73,7 +81,8 @@ DEFAULT_CONFIG = {
     "priority": "normal",
     "transparency": 0,
     "bar_height": 65,
-    "port": 5000
+    "port": 5000,
+    "prevent_sleep_while_visible": False
 }
 
 def load_config():
@@ -105,7 +114,8 @@ def save_config():
         "priority": priority,
         "transparency": transparency,
         "bar_height": bar_height,
-        "port": port
+        "port": port,
+        "prevent_sleep_while_visible": prevent_sleep_while_visible
     }
     try:
         with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
@@ -135,6 +145,7 @@ priority = config["priority"]
 transparency = config["transparency"]
 bar_height = config["bar_height"]
 port = config["port"]
+prevent_sleep_while_visible = config.get("prevent_sleep_while_visible", False)
 
 is_visible = False
 is_paused = False
@@ -144,10 +155,44 @@ hwnd = None
 screen = None
 clock = None
 current_window_position = None
+power_keep_awake_active = False
 
 # Bildschirmgröße
 SCREEN_WIDTH = user32.GetSystemMetrics(0)
 SCREEN_HEIGHT = user32.GetSystemMetrics(1)
+
+
+def allow_windows_sleep():
+    """Gibt eventuelle Wake-Requests frei, damit Bildschirm/PC schlafen duerfen."""
+    global power_keep_awake_active
+    try:
+        kernel32.SetThreadExecutionState(ES_CONTINUOUS)
+    except Exception:
+        pass
+    power_keep_awake_active = False
+
+
+def prevent_windows_sleep():
+    """Verhindert optional waehrend aktiver Anzeige den Sleep-Modus."""
+    global power_keep_awake_active
+    try:
+        kernel32.SetThreadExecutionState(
+            ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_DISPLAY_REQUIRED
+        )
+        power_keep_awake_active = True
+    except Exception:
+        pass
+
+
+def update_power_state():
+    """Synchronisiert den Windows-Energiesparstatus mit der aktuellen Anzeige."""
+    if is_visible and prevent_sleep_while_visible:
+        prevent_windows_sleep()
+    else:
+        allow_windows_sleep()
+
+
+atexit.register(allow_windows_sleep)
 
 # =============================================================================
 # Fenster-Funktionen - IMMER IM VORDERGRUND
@@ -436,6 +481,8 @@ def display_text():
 
 def pygame_loop():
     global running, is_visible, is_minimized
+
+    allow_windows_sleep()
     
     init_pygame()
     time.sleep(0.3)
@@ -452,7 +499,9 @@ def pygame_loop():
                 restore_window()
                 is_minimized = False
                 time.sleep(0.1)
+            update_power_state()
             display_text()
+            update_power_state()
         else:
             if screen:
                 screen.fill((0, 0, 0))
@@ -460,8 +509,10 @@ def pygame_loop():
             if not is_minimized:
                 minimize_window()
                 is_minimized = True
+            update_power_state()
             time.sleep(0.05)
     
+    allow_windows_sleep()
     pygame.quit()
 
 # =============================================================================
@@ -472,7 +523,7 @@ def pygame_loop():
 def index():
     global text, brightness, speed, red, green, blue
     global mode, repeat_count, duration, textsize, position
-    global direction, priority, transparency, is_visible
+    global direction, priority, transparency, is_visible, prevent_sleep_while_visible
     
     if request.method == 'POST':
         text = request.form.get('text', text)
@@ -489,7 +540,9 @@ def index():
         direction = request.form.get('direction', direction)
         priority = request.form.get('priority', priority)
         transparency = int(request.form.get('transparency', transparency))
+        prevent_sleep_while_visible = request.form.get('prevent_sleep_while_visible', '0').lower() in ['1', 'true', 'on', 'yes']
         is_visible = True
+        update_power_state()
         save_config()
         return "OK"
     
@@ -498,7 +551,8 @@ def index():
         red=red, green=green, blue=blue, mode=mode,
         repeat=repeat_count, duration=duration, textsize=textsize,
         position=position, direction=direction, priority=priority,
-        transparency=transparency
+        transparency=transparency,
+        prevent_sleep_while_visible=prevent_sleep_while_visible
     )
 
 # ✅ NEU: POST /text (für lange Texte - KEINE Limits!)
@@ -520,6 +574,7 @@ def api_text_post():
     
     if text:
         is_visible = True
+        update_power_state()
         save_config()
         return f"OK: {len(text)} chars received"
     
@@ -534,6 +589,7 @@ def api_text_query():
     
     if text:
         is_visible = True
+        update_power_state()
         save_config()
         return f"OK: {len(text)} chars"
     
@@ -545,6 +601,7 @@ def api_text_path(new_text):
     global text, is_visible
     text = unquote(new_text)
     is_visible = True
+    update_power_state()
     return "OK"
 
 @app.route('/brightness/<int:val>')
@@ -671,6 +728,16 @@ def api_shutdown():
     threading.Thread(target=do_shutdown, daemon=True).start()
     return "OK"
 
+@app.route('/sleepmode/<string:val>')
+def api_sleepmode(val):
+    global prevent_sleep_while_visible
+    prevent_sleep_while_visible = val.lower() in ['on', '1', 'true', 'yes']
+    update_power_state()
+    save_config()
+    return jsonify({
+        'prevent_sleep_while_visible': prevent_sleep_while_visible
+    })
+
 @app.route('/status')
 def api_status():
     return jsonify({
@@ -678,7 +745,10 @@ def api_status():
         "red": red, "green": green, "blue": blue, "mode": mode,
         "repeat": repeat_count, "duration": duration, "textsize": textsize,
         "position": position, "direction": direction, "priority": priority,
-        "transparency": transparency, "is_visible": is_visible, "is_paused": is_paused
+        "transparency": transparency,
+        "is_visible": is_visible,
+        "is_paused": is_paused,
+        "prevent_sleep_while_visible": prevent_sleep_while_visible
     })
 
 # =============================================================================
