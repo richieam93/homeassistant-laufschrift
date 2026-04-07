@@ -26,7 +26,8 @@ async def async_setup_entry(
     async_add_entities([
         LaufschriftShutdownSwitch(host, port, name, config_entry),
         LaufschriftPauseSwitch(host, port, name, config_entry),
-        LaufschriftWakeScreenSwitch(host, port, name, config_entry),  
+        LaufschriftWakeScreenSwitch(host, port, name, config_entry),
+        LaufschriftSleepModeSwitch(host, port, name, config_entry),
     ])
 
 
@@ -117,11 +118,7 @@ class LaufschriftPauseSwitch(SwitchEntity):
                         _LOGGER.error(f"Error sending command: {response.status}")
         except aiohttp.ClientError as e:
             _LOGGER.error(f"Could not connect to Laufschrift: {e}")
-            
-            
-# =============================================================================
-# 🆕 Display aufwecken Switch
-# =============================================================================
+
 
 class LaufschriftWakeScreenSwitch(SwitchEntity):
     """Representation of a Laufschrift wake screen switch."""
@@ -132,7 +129,7 @@ class LaufschriftWakeScreenSwitch(SwitchEntity):
         self._port = port
         self._name = name
         self.config_entry = config_entry
-        self._is_on = True  # Default: AN
+        self._is_on = True
         self._attr_unique_id = f"laufschrift_{host}_{name}_wakescreen"
         self._attr_name = f"{name} Display aufwecken"
         self._attr_icon = "mdi:monitor-eye"
@@ -155,6 +152,63 @@ class LaufschriftWakeScreenSwitch(SwitchEntity):
         self._is_on = False
         self.async_write_ha_state()
         await self._send_command("/wakescreen/off")
+
+    async def _send_command(self, endpoint: str) -> None:
+        """Send command to Laufschrift."""
+        try:
+            async with aiohttp.ClientSession() as session:
+                url = f"http://{self._host}:{self._port}{endpoint}"
+                async with session.get(url) as response:
+                    if response.status != 200:
+                        _LOGGER.error(f"Error sending command: {response.status}")
+        except aiohttp.ClientError as e:
+            _LOGGER.error(f"Could not connect to Laufschrift: {e}")
+
+
+class LaufschriftSleepModeSwitch(SwitchEntity):
+    """Schalter zum Verhindern des Windows-Schlafmodus waehrend sichtbarer Laufschrift."""
+
+    _attr_should_poll = True
+
+    def __init__(self, host: str, port: int, name: str, config_entry: ConfigEntry) -> None:
+        self._host = host
+        self._port = port
+        self._name = name
+        self.config_entry = config_entry
+        self._is_on = False
+        self._attr_unique_id = f"laufschrift_{host}_{name}_sleepmode"
+        self._attr_name = f"{name} Schlafmodus verhindern"
+        self._attr_icon = "mdi:power-sleep"
+
+    @property
+    def is_on(self) -> bool:
+        return self._is_on
+
+    async def async_turn_on(self, **kwargs) -> None:
+        _LOGGER.info("Enabling sleep prevention while Laufschrift is visible")
+        await self._send_command("/sleepmode/on")
+        self._is_on = True
+        self.async_write_ha_state()
+
+    async def async_turn_off(self, **kwargs) -> None:
+        _LOGGER.info("Disabling sleep prevention while Laufschrift is visible")
+        await self._send_command("/sleepmode/off")
+        self._is_on = False
+        self.async_write_ha_state()
+
+    async def async_update(self) -> None:
+        """Hole den aktuellen Status vom Backend."""
+        try:
+            async with aiohttp.ClientSession() as session:
+                url = f"http://{self._host}:{self._port}/status"
+                async with session.get(url) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        self._is_on = bool(data.get("prevent_sleep_while_visible", False))
+                    else:
+                        _LOGGER.error(f"Error reading sleep mode status: {response.status}")
+        except aiohttp.ClientError as e:
+            _LOGGER.error(f"Could not connect to Laufschrift: {e}")
 
     async def _send_command(self, endpoint: str) -> None:
         """Send command to Laufschrift."""
